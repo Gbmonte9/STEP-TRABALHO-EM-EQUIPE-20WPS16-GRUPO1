@@ -1,0 +1,22 @@
+.sidebar {
+    background-color: #f8f9fa;
+  }
+  
+  .sidebar h2 {
+    color: #000; 
+  }
+  
+  .sidebar .nav-link {
+    color: #000; 
+    transition: background-color 0.3s, color 0.3s;
+  }
+  
+  .sidebar .nav-link:hover {
+    color: #fff;
+    background-color: #000; 
+  }
+
+  .nav-item {
+    padding-left: 0; 
+    margin-left: 0;  
+  }
