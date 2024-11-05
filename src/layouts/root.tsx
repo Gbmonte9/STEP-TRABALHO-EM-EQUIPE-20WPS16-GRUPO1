@@ -11,7 +11,7 @@ function Root() {
       <div className="content" style={{ flex: 1, marginLeft: '180px', display: 'flex', flexDirection: 'column' }}>
         <TopNavBar />
         
-        <main style={{ flex: 1, padding: '1rem', marginTop: '60px' }}> 
+        <main style={{ flex: 1, padding: '1rem', marginTop: '20px' }}> 
           <Outlet />
         </main>
       </div>
