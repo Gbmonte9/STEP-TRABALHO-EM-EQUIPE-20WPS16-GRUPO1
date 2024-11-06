@@ -1,0 +1,35 @@
+Lista de Dominios
+
+Componentes Principais:
+
+1. Usuários:
+
+	-Atributos: ID do usuário, nome, email, senha.
+	-Comportamento: Os usuários podem se registrar, fazer login e gerenciar suas informações.
+
+2. Carteiras:
+
+	-Atributos: ID da carteira, nome, moeda associada, saldo total.
+	-Comportamento: Os usuários podem criar, editar e excluir carteiras.
+
+3. Fontes de Renda:
+
+	-Atributos: ID da renda, nome, valor, data, categoria.
+	-Comportamento: Os usuários podem adicionar, editar e remover fontes de renda.
+
+4. Despesas:
+
+	-Atributos: ID da despesa, descrição, valor, data, categoria, carteira associada.
+	-Comportamento: Os usuários podem adicionar, editar e remover despesas.
+
+5. Relatórios:
+
+	-Atributos: período de análise, total de receitas, total de despesas, saldo.
+	-Comportamento: O sistema deve gerar relatórios com gráficos e listas de receitas e despesas.
+
+
+--Comportamento do Sistema:
+
+	-O usuário deve ser capaz de navegar facilmente entre as seções do aplicativo.
+	-O sistema deve responder a entradas do usuário de maneira intuitiva, garantindo que as informações sejam apresentadas de forma clara e acessível.
+	-O sistema deve garantir a segurança dos dados dos usuários, especialmente informações financeiras sensíveis.
