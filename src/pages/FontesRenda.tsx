@@ -103,7 +103,7 @@ const FontesRenda: React.FC = () => {
                 ))}
               </select>
             </div>
-            <button type="submit" className="btn btn-primary">Adicionar Fonte</button>
+            <button type="submit" className="btn btn-dark">Adicionar Fonte</button>
           </form>
         </div>
       </div>

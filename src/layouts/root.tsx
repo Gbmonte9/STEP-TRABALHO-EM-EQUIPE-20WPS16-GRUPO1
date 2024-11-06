@@ -16,8 +16,8 @@ function Root() {
             <Outlet />
           </main>
         </div>
+        
       </div>
-      
       <Footer />
 
     </div>

@@ -1,13 +1,16 @@
 import React from 'react';
+import '../styles/Footer.css'; // Importação direta sem `styles`
 
 const Footer: React.FC = () => {
-  const currentYear: number = new Date().getFullYear();  
+  const currentYear: number = new Date().getFullYear();
 
   return (
-    <footer className="bg-light py-3 mt-auto">
-      <div className="container text-center">
-        <p className="mb-1">&copy; {currentYear} Step Grupo. Todos os direitos reservados.</p>
-        <p className="mb-0">Desenvolvido com ❤️ por Você</p>
+    <footer className="footer">
+      <div className="footerContainer">
+        <p className="footerText">&copy; {currentYear} Step Grupo. Todos os direitos reservados.</p>
+        <p className="footerText">
+          Desenvolvido com <span className="footerHeart">❤️</span> por Você
+        </p>
       </div>
     </footer>
   );

@@ -85,7 +85,7 @@ const PerfilConfiguracoes = () => {
         </div>
 
         <div className="text-center mt-4">
-          <button type="submit" className="btn btn-success">
+          <button type="submit" className="btn btn-dark">
             Atualizar Perfil
           </button>
         </div>
@@ -94,7 +94,7 @@ const PerfilConfiguracoes = () => {
       <hr />
 
       <div className="text-center">
-        <button onClick={excluirConta} className="btn btn-danger">
+        <button onClick={excluirConta} className="btn btn-secondary">
           Excluir Conta
         </button>
       </div>

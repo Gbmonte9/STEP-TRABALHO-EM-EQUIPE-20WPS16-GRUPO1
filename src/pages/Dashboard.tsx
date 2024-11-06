@@ -29,7 +29,7 @@ const Dashboard: React.FC = () => {
 
       <div className="row">
         <div className="col-md-4">
-          <div className="card text-white bg-primary mb-3">
+          <div className="card text-white bg-dark mb-3">
             <div className="card-header">Saldo Total das Carteiras</div>
             <div className="card-body">
               <h4 className="card-title">R$ {saldoTotalCarteiras.toFixed(2)}</h4>
@@ -38,7 +38,7 @@ const Dashboard: React.FC = () => {
         </div>
 
         <div className="col-md-4">
-          <div className="card text-white bg-danger mb-3">
+          <div className="card text-white bg-secondary mb-3">
             <div className="card-header">Total de Despesas</div>
             <div className="card-body">
               <h4 className="card-title">R$ {totalDespesas.toFixed(2)}</h4>
@@ -47,7 +47,7 @@ const Dashboard: React.FC = () => {
         </div>
 
         <div className="col-md-4">
-          <div className="card text-white bg-success mb-3">
+          <div className="card text-white bg-dark mb-3">
             <div className="card-header">Total de Renda</div>
             <div className="card-body">
               <h4 className="card-title">R$ {totalRenda.toFixed(2)}</h4>
@@ -63,7 +63,7 @@ const Dashboard: React.FC = () => {
             {despesas.slice(0, 5).map((despesa) => (
               <li key={despesa.id} className="list-group-item d-flex justify-content-between align-items-center">
                 {despesa.descricao} - R$ {despesa.valor.toFixed(2)}
-                <span className="badge bg-danger rounded-pill">{despesa.categoria}</span>
+                <span className="badge bg-secondary rounded-pill">{despesa.categoria}</span>
               </li>
             ))}
           </ul>
@@ -75,7 +75,7 @@ const Dashboard: React.FC = () => {
             {fontesRenda.slice(0, 5).map((fonte) => (
               <li key={fonte.id} className="list-group-item d-flex justify-content-between align-items-center">
                 {fonte.nome} - R$ {fonte.valor.toFixed(2)}
-                <span className="badge bg-success rounded-pill">{fonte.categoria}</span>
+                <span className="badge bg-dark rounded-pill">{fonte.categoria}</span>
               </li>
             ))}
           </ul>

@@ -103,7 +103,7 @@ const Despesas: React.FC = () => {
                 ))}
               </select>
             </div>
-            <button type="submit" className="btn btn-primary">Adicionar Despesa</button>
+            <button type="submit" className="btn btn-dark">Adicionar Despesa</button>
           </form>
         </div>
       </div>
