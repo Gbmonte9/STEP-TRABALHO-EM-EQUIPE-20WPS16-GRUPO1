@@ -1,4 +1,3 @@
-// router.tsx
 import { createBrowserRouter } from "react-router-dom";
 import { Root, LoginLayout, CadastroLayout } from "../layouts";
 import { 

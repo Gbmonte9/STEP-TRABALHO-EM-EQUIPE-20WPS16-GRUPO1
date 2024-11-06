@@ -6,27 +6,30 @@ Lista de Requisitos
 	-O sistema deve suportar várias moedas, permitindo a escolha da moeda para cada transação.
 	-O sistema deve permitir o gerenciamento de múltiplas carteiras, cada uma associada a um usuário.
 
-2. Gerenciamento de Renda:
+2. Gerenciamento de Carteiras:
+
+	-O sistema deve permitir o cadastro de múltiplas carteiras, sendo que cada uma estará associada a um usuário.
+	-O sistema deve permitir a edição dos dados de cada carteira (nome, moeda e saldo).
+	-O usuário pode adicionar uma moeda e um valor inicial para cada carteira.
+	-O usuário pode excluir uma carteira.
+	-O sistema deve permitir que o usuário visualize todas as carteiras associadas a ele, mostrando os saldos e moedas de cada uma.
+
+3. Gerenciamento de Renda:
 
 	-O usuário pode adicionar novas fontes de renda com os seguintes atributos: nome da fonte, valor, data de recebimento e categoria.
 	-O usuário pode remover fontes de renda existentes.
 
-3. Gerenciamento de Despesas:
+4. Gerenciamento de Despesas:
 
 	-O usuário pode adicionar novas categorias de despesas com os seguintes atributos: nome da categoria e limite de gastos (opcional).
 	-O usuário pode adicionar despesas com os seguintes atributos: descrição, valor, data, categoria e carteira associada.
 	-O usuário pode remover despesas existentes.
 
-4. Relatórios e Visualizações:
+5. Relatórios e Visualizações:
 
-	-O sistema deve permitir ao usuário visualizar receitas e despesas em um período específico.
+	-O sistema deve permitir ao usuário visualizar receitas e despesas e carteira em um período específico.
 	-O sistema deve oferecer visualização de receitas e despesas por meio de gráficos (opcional) e listas com totais por categoria.
-	-O sistema deve calcular o saldo total (diferença entre receitas e despesas) e exibir no painel principal.
-
-5. Controle de Gastos:
-
-	-O sistema deve alertar o usuário quando o limite de gastos de uma categoria for excedido.
-	-O usuário pode definir um controle de tempo para revisar suas finanças (por exemplo, notificações mensais).
+	-O sistema deve calcular o saldo total (diferença entre receitas e despesas e carteira) e exibir no painel principal.
 
 6. Manutenção de Dados:
 

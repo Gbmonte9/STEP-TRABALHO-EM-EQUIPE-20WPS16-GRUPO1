@@ -1,5 +1,3 @@
-import React from 'react';
-
 const TopNavBar = () => {
     return (
       <nav className="navbar p-3 shadow-sm" style={{ backgroundColor: '#f8f9fa', marginLeft: '180px', width: 'calc(100% - 180px)', position: 'absolute', left: 0 }}>
