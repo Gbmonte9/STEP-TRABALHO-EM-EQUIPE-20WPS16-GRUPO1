@@ -9,22 +9,22 @@ Componentes Principais:
 
 2. Carteiras:
 
-	-Atributos: ID da carteira, nome, moeda associada, saldo total.
-	-Comportamento: Os usuários podem criar, editar e excluir carteiras.
+	-Atributos: ID da carteira, nome, moeda associada, saldo total, Id do usuario.
+	-Comportamento: Os usuários podem criar, editar, excluir e lista carteira.
 
 3. Fontes de Renda:
 
-	-Atributos: ID da renda, nome, valor, data, categoria.
-	-Comportamento: Os usuários podem adicionar, editar e remover fontes de renda.
+	-Atributos: ID da renda, nome, valor, data, categoria, Id do Usuario.
+	-Comportamento: Os usuários podem adicionar, editar, remover e lista de fontes de renda.
 
 4. Despesas:
 
 	-Atributos: ID da despesa, descrição, valor, data, categoria, carteira associada.
-	-Comportamento: Os usuários podem adicionar, editar e remover despesas.
+	-Comportamento: Os usuários podem adicionar, editar, remover e lista de despesas.
 
 5. Relatórios:
 
-	-Atributos: período de análise, total de receitas, total de despesas, saldo.
+	-Atributos: período de análise, total de receitas, total de despesas, total saldo.
 	-Comportamento: O sistema deve gerar relatórios com gráficos e listas de receitas e despesas.
 
 
@@ -32,4 +32,4 @@ Componentes Principais:
 
 	-O usuário deve ser capaz de navegar facilmente entre as seções do aplicativo.
 	-O sistema deve responder a entradas do usuário de maneira intuitiva, garantindo que as informações sejam apresentadas de forma clara e acessível.
-	-O sistema deve garantir a segurança dos dados dos usuários, especialmente informações financeiras sensíveis.
+	-O sistema deve garantir a segurança dos dados dos usuários, especialmente informações financeiras sensíveis.
