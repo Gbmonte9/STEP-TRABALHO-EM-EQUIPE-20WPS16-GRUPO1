@@ -100,7 +100,7 @@ const Carteira: React.FC = () => {
                 required
               />
             </div>
-            <button type="submit" className="btn btn-primary">Adicionar Carteira</button>
+            <button type="submit" className="btn btn-dark">Adicionar Carteira</button>
           </form>
         </div>
       </div>

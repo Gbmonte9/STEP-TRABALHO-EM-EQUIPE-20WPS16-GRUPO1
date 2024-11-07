@@ -78,6 +78,17 @@ const Despesas: React.FC = () => {
               />
             </div>
             <div className="mb-3">
+              <label htmlFor="data" className="form-label">Data:</label>
+              <input
+                type="date"
+                id="data"
+                className="form-control"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                required
+              />
+            </div>
+            <div className="mb-3">
               <label htmlFor="categoria" className="form-label">Categoria:</label>
               <select
                 id="categoria"
@@ -92,7 +103,7 @@ const Despesas: React.FC = () => {
                 ))}
               </select>
             </div>
-            <button type="submit" className="btn btn-primary">Adicionar Despesa</button>
+            <button type="submit" className="btn btn-dark">Adicionar Despesa</button>
           </form>
         </div>
       </div>

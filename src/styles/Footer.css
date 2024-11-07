@@ -1,0 +1,23 @@
+.footer {
+    background-color: #f8f9fa; 
+    padding: 1rem 0;
+    margin-top: auto;
+    text-align: center;
+    width: 100%;
+    z-index: 1;
+}
+  
+.footerContainer {
+    max-width: 960px;
+    margin: auto;
+}
+  
+.footerText {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #6c757d; 
+}
+  
+.footerHeart {
+    color: #e25555; 
+}
