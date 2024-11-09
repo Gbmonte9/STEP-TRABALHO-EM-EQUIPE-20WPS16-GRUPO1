@@ -1,3 +1,4 @@
+import Usuario from '../classes/Bruno-class/Usuario.ts';
 import { Link } from 'react-router-dom';
 import '../styles/Cadastro.css';
 
