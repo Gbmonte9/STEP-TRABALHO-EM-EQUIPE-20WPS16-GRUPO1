@@ -3,7 +3,7 @@ import { useState, FormEvent } from 'react';
 import '../styles/Login.css';
 
 const Login = () => {
-  const [username, setUsername] = useState('');
+  const [useremail, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
@@ -16,8 +16,8 @@ const Login = () => {
       const response = await fetch('http://localhost:5000/usuarios');
       const users = await response.json();
 
-      const user = users.find((user: { username: string, password: string }) => 
-        user.username === username && user.password === password
+      const user = users.find((user: { email: string, senha: string }) => 
+        user.email === useremail && user.senha === password
       );
 
       if (user) {
@@ -35,19 +35,19 @@ const Login = () => {
       <p className="login-instruction">Please log in using your employee credentials</p>
 
       <div className="form-group">
-        <label htmlFor="username">Username</label>
+        <label htmlFor="useremail">Email</label>
         <input 
           type="text" 
-          id="username" 
-          name="username" 
-          value={username}
-          onChange={(e) => setUsername(e.target.value)} 
+          id="useremail" 
+          name="useremail" 
+          value={useremail}
+          onChange={(e) => setEmail(e.target.value)} 
           required 
         />
       </div>
 
       <div className="form-group">
-        <label htmlFor="password">Password</label>
+        <label htmlFor="password">Senha</label>
         <input 
           type="password" 
           id="password" 

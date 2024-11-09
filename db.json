@@ -1,16 +1,24 @@
 {
-    "usuarios": [
-        {
-          "username": "admin",
-          "password": "123456"
-        },
-        {
-          "username": "user",
-          "password": "password"
-        }
-    ],
-    "carteira": [],
-    "renda": [],
-    "despesa": [],
-    "relatorio" : {}
+  "usuarios": [
+    {
+      "username": "admin",
+      "password": "123456",
+      "id": "92cf"
+    },
+    {
+      "username": "user",
+      "password": "password",
+      "id": "f1aa"
+    },
+    {
+      "id": 268651382748874000,
+      "nome": "Gabriel",
+      "email": "gagaagag@asdasd.com",
+      "senha": "1234"
+    }
+  ],
+  "carteira": [],
+  "renda": [],
+  "despesa": [],
+  "relatorio": {}
 }

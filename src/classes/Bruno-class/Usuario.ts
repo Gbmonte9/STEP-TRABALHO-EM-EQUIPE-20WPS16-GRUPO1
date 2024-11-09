@@ -46,8 +46,37 @@ class Usuario {
       this.senha = novaSenha;
     }
   
-    cadastrar(): void {
-      console.log('Usuário cadastrado');
+    // Método para cadastrar o usuário no db.json
+    async cadastrar(): Promise<boolean> {
+      
+      const novoUsuario = {
+        id: this.getId(),
+        nome: this.getNome(),
+        email: this.getEmail(),
+        senha: this.getSenha()
+      };
+
+      // Envia o novo usuário para o servidor do json-server
+      try {
+        const response = await fetch('http://localhost:5000/usuarios', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(novoUsuario),
+        });
+
+        if (response.ok) {
+          console.log('Usuário cadastrado com sucesso!');
+          return true;
+        } else {
+          console.error('Erro ao cadastrar usuário.');
+          return false;
+        }
+      } catch (error) {
+        console.error('Erro de conexão:', error);
+        return false;
+      }
     }
   
     fazerLogin(): void {
