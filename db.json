@@ -1,27 +1,6 @@
 {
   "usuarios": [
     {
-<<<<<<< HEAD
-      "username": "admin",
-      "password": "123456",
-      "id": "92cf"
-    },
-    {
-      "username": "user",
-      "password": "password",
-      "id": "f1aa"
-    },
-    {
-      "id": 268651382748874000,
-      "nome": "Gabriel",
-      "email": "gagaagag@asdasd.com",
-      "senha": "1234"
-    }
-  ],
-  "carteira": [],
-  "renda": [],
-  "despesa": [],
-=======
       "id": "1",
       "nome": "Usuário Teste",
       "email": "usuario@example.com",
@@ -99,6 +78,5 @@
       "carteiraId": 1 
     }
   ],
->>>>>>> dev
   "relatorio": {}
 }

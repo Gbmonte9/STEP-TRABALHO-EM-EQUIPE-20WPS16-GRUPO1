@@ -4,27 +4,15 @@ import { useState, FormEvent } from 'react';
 import '../styles/Login.css';
 
 const Login = () => {
-<<<<<<< HEAD
-  const [useremail, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-=======
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
->>>>>>> dev
   const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = async (e: FormEvent) => {
 
     e.preventDefault();
-
-<<<<<<< HEAD
-      const user = users.find((user: { email: string, senha: string }) => 
-        user.email === useremail && user.senha === password
-      );
-=======
     const usuario = new Usuario();
->>>>>>> dev
 
     const isLoggedIn = await usuario.usuarioLogin(email, senha);
 
@@ -51,21 +39,12 @@ const Login = () => {
       <p className="login-instruction">Por favor, faça login com suas credenciais</p>
 
       <div className="form-group">
-<<<<<<< HEAD
-        <label htmlFor="useremail">Email</label>
-        <input 
-          type="text" 
-          id="useremail" 
-          name="useremail" 
-          value={useremail}
-=======
         <label htmlFor="email">Email</label>
         <input 
           type="email"  
           id="email" 
           name="email" 
           value={email}
->>>>>>> dev
           onChange={(e) => setEmail(e.target.value)} 
           required 
         />
