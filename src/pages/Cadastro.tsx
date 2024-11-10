@@ -32,9 +32,10 @@ const Cadastro = () => {
 
     const id = uuidToNumber(uuidv4());
 
-    const dataAtual = new Date(); // Aqui estamos pegando a data atual
+    const dataAtual = new Date(); 
+    const dataEditar = new Date(); 
 
-    const novoUsuario = new Usuario(id, nome, email, senha, dataAtual);
+    const novoUsuario = new Usuario(id, nome, email, senha, dataAtual, dataEditar);
 
     try {
       const sucesso = await novoUsuario.cadastrarUsuario();

@@ -1,48 +1,108 @@
+import Usuario from "./Usuario.ts";  
 
 class Carteira {
-    id: number;
-    nome: string;
-    moeda: string;
-    saldo: number;
-    dataCriacao: Date;
-    usuarioId: number; 
+    private id: number;
+    private nome: string;
+    private moeda: string;
+    private saldo: number;
+    private dataCriacao: Date;
+    private dataEdicao: Date;
+    private usuarioId: Usuario;  
 
-    constructor(id: number, nome: string, moeda: string, saldo: number, dataCriacao: Date, usuarioId: number) {
+    constructor(id: number, nome: string, moeda: string, saldo: number, dataCriacao: Date, usuario: Usuario) {
         this.id = id;
         this.nome = nome;
         this.moeda = moeda;
         this.saldo = saldo;
         this.dataCriacao = dataCriacao;
-        this.usuarioId = usuarioId;
+        this.dataEdicao = new Date();  
+        this.usuarioId = usuario;    
     }
 
-    adicionar(): boolean {
-        console.log("Adicionar transação");
-        return true;  
+    getId(): number {
+        return this.id;
     }
 
-    remover(): boolean {
-        console.log("Remover transação");
-        return true;  
+    setId(id: number): void {
+        this.id = id;
     }
 
-    editar(): boolean {
-        console.log("Editar carteira");
-        return true; 
+    getNome(): string {
+        return this.nome;
     }
 
-    atualizarSaldo(): boolean {
-        console.log("Atualizar saldo");
-        return true;  
+    setNome(nome: string): void {
+        this.nome = nome;
+        this.dataEdicao = new Date();  
     }
 
-    listarTransacoes(): Transacao[] {
-        console.log("Listar transações");
-        return [];  
+    getMoeda(): string {
+        return this.moeda;
     }
-}
 
-class Transacao {
+    setMoeda(moeda: string): void {
+        this.moeda = moeda;
+        this.dataEdicao = new Date();  
+    }
+
+    getSaldo(): number {
+        return this.saldo;
+    }
+
+    setSaldo(saldo: number): void {
+        this.saldo = saldo;
+        this.dataEdicao = new Date();  
+    }
+
+    getDataCriacao(): Date {
+        return this.dataCriacao;
+    }
+
+    getDataEdicao(): Date {
+        return this.dataEdicao;
+    }
+
+    getUsuario(): Usuario {
+        return this.usuarioId;
+    }
+
+    setUsuario(usuario: Usuario): void {
+        this.usuarioId = usuario;
+    }
+
+    adicionarTransacao(): boolean {
+        console.log("Transação adicionada com sucesso.");
+        return true;
+    }
+
+    removerCarteira(): boolean {
+        console.log("Carteira removida com sucesso.");
+        return true;
+    }
+
+    editarCarteira(nome: string, moeda: string, saldo: number): boolean {
+        this.setNome(nome);
+        this.setMoeda(moeda);
+        this.setSaldo(saldo);
+        console.log("Carteira editada com sucesso.");
+        return true;
+    }
+
+    atualizarSaldoCarteira(saldo: number): boolean {
+        this.setSaldo(saldo);
+        console.log("Saldo da carteira atualizado com sucesso.");
+        return true;
+    }
+
+    localizarCarteira(): Carteira[] {
+        console.log("Localizando carteiras...");
+        return [this];
+    }
+
+    listarCarteira(): Carteira[] {
+        console.log("Listando todas as carteiras...");
+        return [this];
+    }
 }
 
 export default Carteira;

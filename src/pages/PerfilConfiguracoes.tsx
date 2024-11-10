@@ -1,5 +1,6 @@
 import Usuario from "../classes/Usuario.ts";
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const PerfilConfiguracoes = () => {
   const [nome, setNome] = useState("");
@@ -7,6 +8,7 @@ const PerfilConfiguracoes = () => {
   const [senha, setSenha] = useState("");
   const [confirmarSenha, setConfirmarSenha] = useState("");
   const [usuarioId, setUsuarioId] = useState<number | null>(null); 
+  const navigate = useNavigate(); 
 
   useEffect(() => {
     const storedId = localStorage.getItem("usuarioId");
@@ -52,7 +54,8 @@ const PerfilConfiguracoes = () => {
     usuario.setEmail(email);
     usuario.setSenha(senha);
 
-    const sucesso = await usuario.editarUsuario(usuarioId);
+    const dataEditar = new Date(); 
+    const sucesso = await usuario.editarUsuario(usuarioId, nome, email, senha, dataEditar);
 
     if (sucesso) {
       console.log("Perfil atualizado com sucesso!");
@@ -61,12 +64,25 @@ const PerfilConfiguracoes = () => {
     }
   };
 
-  const excluirConta = () => {
+  const excluirConta = async () => {
+    if (!usuarioId) {
+      console.log("ID de usuário não encontrado.");
+      return;
+    }
+
     const confirmacao = window.confirm(
       "Tem certeza que deseja excluir sua conta? Esta ação não pode ser revertida."
     );
     if (confirmacao) {
-      console.log("Conta excluída!");
+      const usuario = new Usuario();
+      const sucesso = await usuario.excluirConta(usuarioId);
+
+      if (sucesso) {
+        console.log("Conta excluída com sucesso!");
+        navigate("/login"); 
+      } else {
+        console.log("Falha ao excluir a conta.");
+      }
     }
   };
 

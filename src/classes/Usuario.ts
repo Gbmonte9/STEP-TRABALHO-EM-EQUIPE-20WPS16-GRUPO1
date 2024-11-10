@@ -46,6 +46,14 @@ class Usuario {
     setId(novoId: number): void {
         this.id = novoId;
     }
+
+    setData(novaData: Date) : void {
+        this.dataCadastro = novaData;
+    }
+
+    setEditarData(novaDataEditado: Date) : void {
+        this.dataEditar = novaDataEditado;
+    }
       
     setNome(novoNome: string): void {
         this.nome = novoNome;
@@ -67,7 +75,8 @@ class Usuario {
             nome: this.getNome(),
             email: this.getEmail(),
             senha: this.getSenha(),
-            data: this.getDataCadastro()
+            data: this.getDataCadastro(),
+            dataEditar : this.getDataEditar()
 
         };
 
@@ -134,9 +143,11 @@ class Usuario {
     }
 
     async localizarUsuario(id: number): Promise<boolean> {
+
         const url = `http://localhost:5000/usuarios/${id}`;  
         
         try {
+
             const response = await fetch(url, {
                 method: 'GET',  
                 headers: {
@@ -154,6 +165,8 @@ class Usuario {
                     this.setNome(usuario.nome);
                     this.setEmail(usuario.email);
                     this.setSenha(usuario.senha);
+                    this.setData(usuario.data);
+                    this.setEditarData(usuario.dataEditar);
     
                     console.log('Nome do usuário:', this.getNome());
                     console.log('Email do usuário:', this.getEmail());
@@ -164,62 +177,96 @@ class Usuario {
                     console.error('Usuário não encontrado');
                     return false;  
                 }
+
             } else {
                 console.error('Erro ao localizar o usuário');
+                return false; 
+            }
+
+        } catch (error) {
+            console.error('Erro de conexão:', error);
+            return false;  
+        }
+
+    }
+
+    async editarUsuario(id: number, nome: string, email: string, senha: string, dataEditar: Date): Promise<boolean> {
+        
+        const url = `http://localhost:5000/usuarios/${id}`;
+        
+        const usuarioExistente = await this.localizarUsuario(id);
+        
+        if (!usuarioExistente) {
+            console.error('Usuário não encontrado para atualização');
+            return false; 
+        }
+    
+        const usuarioData = {
+            id: id,  
+            nome: nome, 
+            email: email,
+            senha: senha,
+            data: this.getDataCadastro(),  
+            dataEditar: dataEditar.toISOString(),  
+        };
+        
+        try {
+            const response = await fetch(url, {
+                method: 'PUT',  
+                headers: {
+                    'Content-Type': 'application/json',  
+                },
+                body: JSON.stringify(usuarioData), 
+            });
+    
+            if (response.ok) {
+                console.log('Usuário atualizado com sucesso!');
+                return true;  
+            } else {
+                const errorBody = await response.text(); 
+                console.error('Erro ao atualizar o usuário:', errorBody);
+                return false;
+            }
+        } catch (error) {
+            
+            console.error('Erro de conexão:', error);
+            return false;
+        }
+    }
+
+    async excluirConta(id: number): Promise<boolean> {
+
+        console.log("Excluir conta do usuário");
+
+        const usuarioExistente = await this.localizarUsuario(id);
+        
+        if (!usuarioExistente) {
+            console.error('Usuário não encontrado para exclusão');
+            return false;  
+        }
+
+        const url = `http://localhost:5000/usuarios/${id}`;
+
+        try {
+            
+            const response = await fetch(url, {
+                method: 'DELETE',  
+                headers: {
+                    'Content-Type': 'application/json', 
+                },
+            });
+
+            if (response.ok) {
+                console.log('Conta do usuário excluída com sucesso!');
+                return true; 
+            } else {
+                console.error('Erro ao excluir a conta do usuário');
                 return false; 
             }
         } catch (error) {
             console.error('Erro de conexão:', error);
             return false;  
         }
-    }
-
-    async editarUsuario(id: number): Promise<boolean> {
-        const url = `http://localhost:5000/usuarios/${id}`; 
-
-        const usuarioExistente = await this.localizarUsuario(id);
-        
-        if (!usuarioExistente) {
-            console.error('Usuário não encontrado para atualização');
-            return false;  
-        }
-
-        const usuarioData = {
-            id: id,  
-            nome: this.getNome(),
-            email: this.getEmail(),
-            senha: this.getSenha(),
-        };
-
-        try {
-         
-            const response = await fetch(url, {
-                method: 'PUT',  
-                headers: {
-                    'Content-Type': 'application/json', 
-                },
-                body: JSON.stringify(usuarioData),  
-            });
-
-      
-            if (response.ok) {
-                console.log('Usuário atualizado com sucesso!');
-                return true;
-            } else {
-             
-                console.error('Erro ao atualizar o usuário');
-                return false;
-            }
-        } catch (error) {
-          
-            console.error('Erro de conexão:', error);
-            return false;
-        }
-    }
-
-    excluirConta(): boolean {
-        console.log("Excluir conta do usuário");
-        return true;
     }
 
     recuperarSenha(): boolean {

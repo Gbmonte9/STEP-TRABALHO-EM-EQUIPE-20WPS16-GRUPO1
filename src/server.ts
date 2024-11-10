@@ -2,14 +2,14 @@ import * as http from 'http';
 import { IncomingMessage, ServerResponse } from 'http';
 
 type Usuario = {
-  id: number;  
+  id: number;
   nome: string;
   email: string;
   senha: string;
 };
 
 let usuarios: Usuario[] = [];
-let nextId = 1; 
+let nextId = 1; // Agora você mantém o nextId para quando for necessário
 
 const requestHandler = async (req: IncomingMessage, res: ServerResponse) => {
   const { method, url } = req;
@@ -42,8 +42,10 @@ const requestHandler = async (req: IncomingMessage, res: ServerResponse) => {
 
     req.on('end', () => {
       const usuarioData = JSON.parse(body);
+      
+      // Atribui o id manualmente, caso você tenha um método para gerenciar o ID
       const novoUsuario: Usuario = {
-        id: nextId++,  
+        id: nextId++, // Aqui você continua usando nextId para gerar o ID, se necessário
         ...usuarioData,
       };
 
