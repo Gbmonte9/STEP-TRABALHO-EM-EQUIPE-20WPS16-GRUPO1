@@ -133,9 +133,88 @@ class Usuario {
         }
     }
 
-    editarPerfil(): boolean {
-        console.log("Editar perfil do usuário");
-        return true;
+    async localizarUsuario(id: number): Promise<boolean> {
+        const url = `http://localhost:5000/usuarios/${id}`;  
+        
+        try {
+            const response = await fetch(url, {
+                method: 'GET',  
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+    
+            if (response.ok) {
+                const usuario = await response.json();  
+    
+                if (usuario) {
+                    console.log('Usuário encontrado!');
+    
+                    this.setId(usuario.id);
+                    this.setNome(usuario.nome);
+                    this.setEmail(usuario.email);
+                    this.setSenha(usuario.senha);
+    
+                    console.log('Nome do usuário:', this.getNome());
+                    console.log('Email do usuário:', this.getEmail());
+                    console.log('Senha do usuário:', this.getSenha());
+    
+                    return true;  
+                } else {
+                    console.error('Usuário não encontrado');
+                    return false;  
+                }
+            } else {
+                console.error('Erro ao localizar o usuário');
+                return false; 
+            }
+        } catch (error) {
+            console.error('Erro de conexão:', error);
+            return false;  
+        }
+    }
+
+    async editarUsuario(id: number): Promise<boolean> {
+        const url = `http://localhost:5000/usuarios/${id}`; 
+
+        const usuarioExistente = await this.localizarUsuario(id);
+        
+        if (!usuarioExistente) {
+            console.error('Usuário não encontrado para atualização');
+            return false;  
+        }
+
+        const usuarioData = {
+            id: id,  
+            nome: this.getNome(),
+            email: this.getEmail(),
+            senha: this.getSenha(),
+        };
+
+        try {
+         
+            const response = await fetch(url, {
+                method: 'PUT',  
+                headers: {
+                    'Content-Type': 'application/json', 
+                },
+                body: JSON.stringify(usuarioData),  
+            });
+
+      
+            if (response.ok) {
+                console.log('Usuário atualizado com sucesso!');
+                return true;
+            } else {
+             
+                console.error('Erro ao atualizar o usuário');
+                return false;
+            }
+        } catch (error) {
+          
+            console.error('Erro de conexão:', error);
+            return false;
+        }
     }
 
     excluirConta(): boolean {
