@@ -1,6 +1,7 @@
 {
   "usuarios": [
     {
+<<<<<<< HEAD
       "username": "admin",
       "password": "123456",
       "id": "92cf"
@@ -20,5 +21,84 @@
   "carteira": [],
   "renda": [],
   "despesa": [],
+=======
+      "id": "1",
+      "nome": "Usuário Teste",
+      "email": "usuario@example.com",
+      "senha": "senha123",
+      "data": "2024-11-09T23:39:12.654Z"
+    },
+    {
+      "id": "1164527491",
+      "nome": "Gabriel RMssssss",
+      "email": "gabriel@gmail.com",
+      "senha": "1234",
+      "data": "2024-11-10T03:56:04.748Z",
+      "dataEditar": "2024-11-10T03:58:34.381Z"
+    }
+  ],
+  "carteira": [
+    {
+      "id": "1",
+      "nome": "Carteira Principal",
+      "moeda": "BRL",
+      "saldo": 1500.75,
+      "data": "2024-11-05",
+      "usuarioId": 1
+    },
+    {
+      "id": "2",
+      "nome": "Investimentos",
+      "moeda": "BRL",
+      "saldo": 5000,
+      "data": "2024-11-05",
+      "usuarioId": 1
+    }
+  ],
+  "renda": [
+    { 
+      "id": 1, 
+      "nome": "Salário", 
+      "valor": 3000.00, 
+      "data": "2024-10-30", 
+      "categoria": "Salário", 
+      "usuarioId": 1 
+    },
+    { 
+      "id": 2, 
+      "nome": "Freelance", 
+      "valor": 500.00, 
+      "data": "2024-10-25", 
+      "categoria": "Freelance", 
+      "usuarioId": 1 
+    }
+  ],
+  "despesa": [
+    { 
+      "id": 1, 
+      "descricao": "Supermercado", 
+      "valor": 250.00, 
+      "data": "2024-11-04", 
+      "categoria": "Alimentação", 
+      "carteiraId": 1 
+    },
+    { 
+      "id": 2, 
+      "descricao": "Academia", 
+      "valor": 120.00, 
+      "data": "2024-11-03", 
+      "categoria": "Saúde", 
+      "carteiraId": 1 
+    },
+    { 
+      "id": 3, 
+      "descricao": "Transporte", 
+      "valor": 45.00, 
+      "data": "2024-11-02", 
+      "categoria": "Transporte",
+      "carteiraId": 1 
+    }
+  ],
+>>>>>>> dev
   "relatorio": {}
 }
