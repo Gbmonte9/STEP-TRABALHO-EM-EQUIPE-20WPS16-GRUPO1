@@ -1,22 +1,42 @@
 
-class Usuario {
+import Carteira from "./Carteira.ts";
 
+class Usuario {
+    
     private id: number;
     private nome: string;
     private email: string;
     private senha: string;
     private dataCadastro: Date;
     private dataEditar: Date;
-    public mensagem: string;  
-
-    constructor(id?: number, nome?: string, email?: string, senha?: string, dataCadastro?: Date, dataEditar?: Date,mensagem?: string) {
-        this.id = id ?? 0;
-        this.nome = nome ?? '';
-        this.email = email ?? '';
-        this.senha = senha ?? '';
-        this.dataCadastro = dataCadastro ?? new Date();
-        this.dataEditar = dataEditar ?? new Date();
-        this.mensagem = mensagem ?? '';
+    public mensagem: string;
+    private carteiras: Carteira[];  
+  
+    constructor(
+      id?: number, 
+      nome?: string, 
+      email?: string, 
+      senha?: string, 
+      dataCadastro?: Date, 
+      dataEditar?: Date,
+      mensagem?: string
+    ) {
+      this.id = id ?? 0;  
+      this.nome = nome ?? '';
+      this.email = email ?? '';
+      this.senha = senha ?? '';
+      this.dataCadastro = dataCadastro ?? new Date();  
+      this.dataEditar = dataEditar ?? new Date();     
+      this.mensagem = mensagem ?? '';                  
+      this.carteiras = [];                              
+    }
+  
+    public adicionarCarteira(carteira: Carteira): void {
+      this.carteiras.push(carteira);  
+    }
+  
+    public listarCarteiras(): Carteira[] {
+      return this.carteiras; 
     }
 
     getId(): number {

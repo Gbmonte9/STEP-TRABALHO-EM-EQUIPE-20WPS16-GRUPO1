@@ -8,22 +8,30 @@ type Usuario = {
   senha: string;
 };
 
+type Carteira = {
+  id: number;
+  nome: string;
+  moeda: string;
+  saldo: number;
+  usuarioId: number;
+};
+
 let usuarios: Usuario[] = [];
-let nextId = 1; // Agora você mantém o nextId para quando for necessário
+let carteiras: Carteira[] = [];
+let nextId = 1; 
+let nextCarteiraId = 1; 
 
 const requestHandler = async (req: IncomingMessage, res: ServerResponse) => {
   const { method, url } = req;
-  
-  res.setHeader('Content-Type', 'application/json');
-  
-  if (method === 'GET' && url === '/usuarios') {
 
+  res.setHeader('Content-Type', 'application/json');
+
+  if (method === 'GET' && url === '/usuarios') {
     res.statusCode = 200;
     res.end(JSON.stringify(usuarios));
 
   } else if (method === 'GET' && url?.startsWith('/usuarios/')) {
-    
-    const id = parseInt(url.split('/')[2], 10); 
+    const id = parseInt(url.split('/')[2], 10);
     const usuario = usuarios.find((u) => u.id === id);
 
     if (usuario) {
@@ -33,8 +41,8 @@ const requestHandler = async (req: IncomingMessage, res: ServerResponse) => {
       res.statusCode = 404;
       res.end(JSON.stringify({ message: 'Usuário não encontrado' }));
     }
-  } else if (method === 'POST' && url === '/usuarios') {
 
+  } else if (method === 'POST' && url === '/usuarios') {
     let body = '';
     req.on('data', (chunk) => {
       body += chunk;
@@ -42,17 +50,48 @@ const requestHandler = async (req: IncomingMessage, res: ServerResponse) => {
 
     req.on('end', () => {
       const usuarioData = JSON.parse(body);
-      
-      // Atribui o id manualmente, caso você tenha um método para gerenciar o ID
       const novoUsuario: Usuario = {
-        id: nextId++, // Aqui você continua usando nextId para gerar o ID, se necessário
+        id: nextId++, 
         ...usuarioData,
       };
-
-      usuarios.push(novoUsuario);  
+      usuarios.push(novoUsuario);
       res.statusCode = 201;
       res.end(JSON.stringify(novoUsuario));
     });
+
+  } else if (method === 'GET' && url === '/carteiras') {
+    res.statusCode = 200;
+    res.end(JSON.stringify(carteiras));
+
+  } else if (method === 'GET' && url?.startsWith('/carteiras/')) {
+    const id = parseInt(url.split('/')[2], 10);
+    const carteira = carteiras.find((c) => c.id === id);
+
+    if (carteira) {
+      res.statusCode = 200;
+      res.end(JSON.stringify(carteira));
+    } else {
+      res.statusCode = 404;
+      res.end(JSON.stringify({ message: 'Carteira não encontrada' }));
+    }
+
+  } else if (method === 'POST' && url === '/carteiras') {
+    let body = '';
+    req.on('data', (chunk) => {
+      body += chunk;
+    });
+
+    req.on('end', () => {
+      const carteiraData = JSON.parse(body);
+      const novaCarteira: Carteira = {
+        id: nextCarteiraId++,
+        ...carteiraData,
+      };
+      carteiras.push(novaCarteira);
+      res.statusCode = 201;
+      res.end(JSON.stringify(novaCarteira));
+    });
+
   } else {
     res.statusCode = 404;
     res.end(JSON.stringify({ message: 'Rota não encontrada' }));
