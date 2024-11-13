@@ -1,7 +1,7 @@
 {
   "usuarios": [
     {
-      "id": "1",
+      "id": 1,
       "nome": "Usuário Teste",
       "email": "usuario@example.com",
       "senha": "senha123",
@@ -10,7 +10,7 @@
   ],
   "carteira": [
     {
-      "id": "1",
+      "id": 1,
       "nome": "Carteira Principal",
       "moeda": "BRL",
       "saldo": 1500.75,
@@ -18,7 +18,7 @@
       "usuarioId": 1
     },
     {
-      "id": "2",
+      "id": 2,
       "nome": "Investimentos",
       "moeda": "BRL",
       "saldo": 5000,
@@ -28,7 +28,7 @@
   ],
   "renda": [
     {
-      "id": "1",
+      "id": 1,
       "nome": "Salário",
       "valor": 3000,
       "data": "2024-10-30",
@@ -36,7 +36,7 @@
       "usuarioId": 1
     },
     {
-      "id": "2",
+      "id": 2,
       "nome": "Freelance",
       "valor": 500,
       "data": "2024-10-25",
@@ -46,7 +46,7 @@
   ],
   "despesa": [
     {
-      "id": "1",
+      "id": 1,
       "descricao": "Supermercado",
       "valor": 250,
       "data": "2024-11-04",
@@ -54,7 +54,7 @@
       "carteiraId": 1
     },
     {
-      "id": "2",
+      "id": 2,
       "descricao": "Academia",
       "valor": 120,
       "data": "2024-11-03",
@@ -62,7 +62,7 @@
       "carteiraId": 1
     },
     {
-      "id": "3",
+      "id": 3,
       "descricao": "Transporte",
       "valor": 45,
       "data": "2024-11-02",
