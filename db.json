@@ -14,6 +14,14 @@
       "senha": "1234",
       "data": "2024-11-10T03:56:04.748Z",
       "dataEditar": "2024-11-10T03:58:34.381Z"
+    },
+    {
+      "id": 1290716134,
+      "nome": "Gabriel",
+      "email": "gabrielm@gmail.com",
+      "senha": "1234",
+      "data": "2024-11-13T15:20:41.121Z",
+      "dataEditar": "2024-11-13T15:20:41.121Z"
     }
   ],
   "carteira": [
@@ -35,47 +43,47 @@
     }
   ],
   "renda": [
-    { 
-      "id": 1, 
-      "nome": "Salário", 
-      "valor": 3000.00, 
-      "data": "2024-10-30", 
-      "categoria": "Salário", 
-      "usuarioId": 1 
+    {
+      "id": "1",
+      "nome": "Salário",
+      "valor": 3000,
+      "data": "2024-10-30",
+      "categoria": "Salário",
+      "usuarioId": 1
     },
-    { 
-      "id": 2, 
-      "nome": "Freelance", 
-      "valor": 500.00, 
-      "data": "2024-10-25", 
-      "categoria": "Freelance", 
-      "usuarioId": 1 
+    {
+      "id": "2",
+      "nome": "Freelance",
+      "valor": 500,
+      "data": "2024-10-25",
+      "categoria": "Freelance",
+      "usuarioId": 1
     }
   ],
   "despesa": [
-    { 
-      "id": 1, 
-      "descricao": "Supermercado", 
-      "valor": 250.00, 
-      "data": "2024-11-04", 
-      "categoria": "Alimentação", 
-      "carteiraId": 1 
+    {
+      "id": "1",
+      "descricao": "Supermercado",
+      "valor": 250,
+      "data": "2024-11-04",
+      "categoria": "Alimentação",
+      "carteiraId": 1
     },
-    { 
-      "id": 2, 
-      "descricao": "Academia", 
-      "valor": 120.00, 
-      "data": "2024-11-03", 
-      "categoria": "Saúde", 
-      "carteiraId": 1 
+    {
+      "id": "2",
+      "descricao": "Academia",
+      "valor": 120,
+      "data": "2024-11-03",
+      "categoria": "Saúde",
+      "carteiraId": 1
     },
-    { 
-      "id": 3, 
-      "descricao": "Transporte", 
-      "valor": 45.00, 
-      "data": "2024-11-02", 
+    {
+      "id": "3",
+      "descricao": "Transporte",
+      "valor": 45,
+      "data": "2024-11-02",
       "categoria": "Transporte",
-      "carteiraId": 1 
+      "carteiraId": 1
     }
   ],
   "relatorio": {}
