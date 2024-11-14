@@ -12,7 +12,6 @@ const Login = () => {
   const handleSubmit = async (e: FormEvent) => {
 
     e.preventDefault();
-
     const usuario = new Usuario();
 
     const isLoggedIn = await usuario.usuarioLogin(email, senha);

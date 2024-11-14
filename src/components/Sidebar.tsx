@@ -6,7 +6,7 @@ const Sidebar = () => {
   return (
     <div className="sidebar bg-light vh-100" style={{ width: '180px', position: 'fixed', left: 0, top: 0 }}>
       <div className='p-1'>
-        <h2 className="mb-4 text-start">MeuApp</h2>
+        <h2 className="mb-4 text-start">ADC</h2>
       </div>
       <ul className="nav flex-column">
         <li className="nav-item p-0">

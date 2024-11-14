@@ -1,22 +1,42 @@
 
-class Usuario {
+import Carteira from "./Carteira.ts";
 
+class Usuario {
+    
     private id: number;
     private nome: string;
     private email: string;
     private senha: string;
     private dataCadastro: Date;
     private dataEditar: Date;
-    public mensagem: string;  
-
-    constructor(id?: number, nome?: string, email?: string, senha?: string, dataCadastro?: Date, dataEditar?: Date,mensagem?: string) {
-        this.id = id ?? 0;
-        this.nome = nome ?? '';
-        this.email = email ?? '';
-        this.senha = senha ?? '';
-        this.dataCadastro = dataCadastro ?? new Date();
-        this.dataEditar = dataEditar ?? new Date();
-        this.mensagem = mensagem ?? '';
+    public mensagem: string;
+    private carteiras: Carteira[];  
+  
+    constructor(
+      id?: number, 
+      nome?: string, 
+      email?: string, 
+      senha?: string, 
+      dataCadastro?: Date, 
+      dataEditar?: Date,
+      mensagem?: string
+    ) {
+      this.id = id ?? 0;  
+      this.nome = nome ?? '';
+      this.email = email ?? '';
+      this.senha = senha ?? '';
+      this.dataCadastro = dataCadastro ?? new Date();  
+      this.dataEditar = dataEditar ?? new Date();     
+      this.mensagem = mensagem ?? '';                  
+      this.carteiras = [];                              
+    }
+  
+    public adicionarCarteira(carteira: Carteira): void {
+      this.carteiras.push(carteira);  
+    }
+  
+    public listarCarteiras(): Carteira[] {
+      return this.carteiras; 
     }
 
     getId(): number {
@@ -71,7 +91,7 @@ class Usuario {
     
         const novoUsuario = {
 
-            id: this.getId(),
+            id: this.getId().toString(),
             nome: this.getNome(),
             email: this.getEmail(),
             senha: this.getSenha(),
@@ -190,82 +210,49 @@ class Usuario {
 
     }
 
-    async editarUsuario(id: number, nome: string, email: string, senha: string, dataEditar: Date): Promise<boolean> {
-        
-        const url = `http://localhost:5000/usuarios/${id}`;
-        
-        const usuarioExistente = await this.localizarUsuario(id);
-        
-        if (!usuarioExistente) {
-            console.error('Usuário não encontrado para atualização');
-            return false; 
+    async editarCarteira(id: number, nome: string, moeda: string, saldo: number, dataEditar: Date, usuarioId: number): Promise<boolean> {
+        if (!id) {
+            console.error("ID da carteira não encontrado!");
+            return false;
         }
     
-        const usuarioData = {
-            id: id,  
-            nome: nome, 
-            email: email,
-            senha: senha,
-            data: this.getDataCadastro(),  
-            dataEditar: dataEditar.toISOString(),  
+        console.log("Editando carteira...");
+        console.log('Usuario ID antes de editar:', usuarioId);  // Verifique o valor
+    
+        const url = `http://localhost:5000/carteira/${id}`;
+    
+        const corpoRequisicao = {
+            id: id,  // Se você precisa enviar o id da instância atual
+            nome: nome,
+            moeda: moeda,
+            saldo : saldo,
+            dataCriacao: this.getDataCadastro(),
+            dataEditar : dataEditar,
+            usuarioId : usuarioId,
         };
-        
+    
+        console.log('Corpo da requisição:', corpoRequisicao);  // Depuração do corpo
+    
         try {
             const response = await fetch(url, {
-                method: 'PUT',  
+                method: 'PUT', // ou 'PATCH', dependendo da sua API
                 headers: {
-                    'Content-Type': 'application/json',  
+                    'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(usuarioData), 
+                body: JSON.stringify(corpoRequisicao),
             });
     
             if (response.ok) {
-                console.log('Usuário atualizado com sucesso!');
-                return true;  
+                console.log('Carteira editada com sucesso!');
+                return true;
             } else {
-                const errorBody = await response.text(); 
-                console.error('Erro ao atualizar o usuário:', errorBody);
+                const errorData = await response.json();
+                console.error('Erro ao editar a carteira:', errorData.message || response.statusText);
                 return false;
             }
         } catch (error) {
-            
             console.error('Erro de conexão:', error);
             return false;
-        }
-    }
-
-    async excluirConta(id: number): Promise<boolean> {
-
-        console.log("Excluir conta do usuário");
-
-        const usuarioExistente = await this.localizarUsuario(id);
-        
-        if (!usuarioExistente) {
-            console.error('Usuário não encontrado para exclusão');
-            return false;  
-        }
-
-        const url = `http://localhost:5000/usuarios/${id}`;
-
-        try {
-            
-            const response = await fetch(url, {
-                method: 'DELETE',  
-                headers: {
-                    'Content-Type': 'application/json', 
-                },
-            });
-
-            if (response.ok) {
-                console.log('Conta do usuário excluída com sucesso!');
-                return true; 
-            } else {
-                console.error('Erro ao excluir a conta do usuário');
-                return false; 
-            }
-        } catch (error) {
-            console.error('Erro de conexão:', error);
-            return false;  
         }
     }
 

@@ -1,50 +1,197 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import Vcarteira from '../classes/Carteira';
+import { v4 as uuidv4 } from 'uuid';
+import { format } from 'date-fns';
+import '../styles/Carteira.css';
 
-interface Carteira {
+interface ICarteira {
   id: number;
   nome: string;
   moeda: string;
   saldo: number;
   data: string;
+  dataEdicao: string;
   usuarioId: number;
 }
 
-const moedas = [
-  'BRL', 
-  'USD', 
-  'EUR', 
-  'GBP', 
-  'JPY', 
-];
+const moedas = ['BRL', 'USD', 'EUR', 'GBP', 'JPY'];
 
-const Carteira: React.FC = () => {
-  const [carteiras, setCarteiras] = useState<Carteira[]>([]);
+const Carteira = () => {
+  const [carteiras, setCarteiras] = useState<ICarteira[]>([]);
   const [nome, setNome] = useState('');
   const [moeda, setMoeda] = useState(moedas[0]);
-  const [saldo, setSaldo] = useState<number | ''>('');
-  const [data, setData] = useState('');
-  const usuarioId = 1; 
+  const [saldo, setSaldo] = useState<number>(0); 
+  const [usuarioId, setUsuarioId] = useState<number | null>(null);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [mensagemCarteiraVazia, setMensagemCarteiraVazia] = useState("");
+  const [carteiraEditando, setCarteiraEditando] = useState(null);
+  const [novoNome, setNovoNome] = useState('');
+  const [novaMoeda, setNovaMoeda] = useState('');
+  const [novoSaldo, setNovoSaldo] = useState<number>(0);
 
-  const adicionarCarteira = (e: React.FormEvent) => {
+  function uuidToNumber(uuid: string): number {
+    let hash = 0;
+    for (let i = 0; i < uuid.length; i++) {
+      const char = uuid.charCodeAt(i);
+      hash = (hash << 5) - hash + char;
+      hash = hash & hash;
+    }
+    return Math.abs(hash);
+  }
+
+  useEffect(() => {
+    const storedId = localStorage.getItem('usuarioId');
+    if (storedId) {
+      setUsuarioId(parseInt(storedId, 10));
+    }
+  }, []);
+
+  useEffect(() => {
+    const carregarCarteiras = async () => {
+        if (usuarioId !== null && usuarioId !== undefined) {  
+            try {
+                const vcarteiraInstance = new Vcarteira();
+                const carteirasAtualizadas = await vcarteiraInstance.listarCarteiras(usuarioId);
+
+                if (carteirasAtualizadas.length === 0) {
+                    setMensagemCarteiraVazia("Você ainda não possui carteiras.");
+                } else {
+                    setMensagemCarteiraVazia(""); 
+                }
+
+                setCarteiras(carteirasAtualizadas.map((carteira) => ({
+                    id: carteira.getId(),
+                    nome: carteira.getNome(),
+                    moeda: carteira.getMoeda(),
+                    saldo: carteira.getSaldo(),
+                    data: carteira.getDataCriacao().toISOString(),
+                    dataEdicao: carteira.getDataEdicao().toISOString(),
+                    usuarioId: carteira.getUsuarioId(),
+                })));
+
+            } catch (error) {
+                console.error("Erro ao listar carteiras:", error);
+                setMensagemCarteiraVazia("Erro ao carregar carteiras.");
+            }
+        } else {
+            console.warn("usuarioId está indefinido ou é nulo");
+        }
+    };
+
+    carregarCarteiras();
+  }, [usuarioId]);
+
+  const adicionarCarteira = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (nome && saldo !== '' && data) {
-      const novaCarteira: Carteira = {
-        id: Math.floor(Math.random() * 1000), 
-        nome,
-        moeda,
-        saldo: Number(saldo),
-        data,
-        usuarioId,
-      };
 
-      setCarteiras([...carteiras, novaCarteira]);
-      setNome('');
-      setMoeda(moedas[0]);
-      setSaldo('');
-      setData('');
+    if (!usuarioId) {
+        console.error("Erro: ID de usuário não encontrado.");
+        setErrorMessage("Erro: ID de usuário não encontrado.");
+        return;
+    }
+
+    if (!nome || !moeda || saldo === undefined) {
+        console.error("Erro: Todos os campos devem ser preenchidos.");
+        setErrorMessage("Erro: Todos os campos devem ser preenchidos.");
+        return;
+    }
+
+    try {
+
+        const id = uuidToNumber(uuidv4()); 
+        const dataAtual = new Date(); 
+
+        const novaCarteira = new Vcarteira(id, nome, moeda, saldo, dataAtual, dataAtual, usuarioId);
+
+        const sucesso = await novaCarteira.adicionarCarteira();
+
+        if (sucesso) {
+
+          console.log("Carteira adicionada com sucesso.");
+          setErrorMessage("Carteira adicionada com sucesso.");
+
+            const vcarteiraInstance = new Vcarteira();
+            const carteirasAtualizadas = await vcarteiraInstance.listarCarteiras(usuarioId);
+
+            setCarteiras(carteirasAtualizadas.map((carteira) => ({
+                id: carteira.getId(),
+                nome: carteira.getNome(),
+                moeda: carteira.getMoeda(),
+                saldo: carteira.getSaldo(),
+                data: carteira.getDataCriacao().toISOString(),
+                dataEdicao: carteira.getDataEdicao().toISOString(),
+                usuarioId: carteira.getUsuarioId(),
+            })));
+
+            setNome("");
+            setMoeda("");
+            setSaldo(0);
+        } else {
+            console.error("Erro ao adicionar carteira.");
+        }
+    } catch (error) {
+        console.error("Erro ao adicionar carteira:", error);
     }
   };
+
+  const handleEditarClique = (carteira: any) => {
+    setCarteiraEditando(carteira.id);
+    setNovoNome(carteira.nome);
+    setNovaMoeda(carteira.moeda);
+    setNovoSaldo(carteira.saldo);
+  };
+
+  const handleSalvarEdicao = async (carteiraId: number) => {
+    try {
+      const carteira = new Vcarteira();
+      const dataEditar = new Date(); 
+
+      console.log("ID: " + carteiraId);
+      console.log("IDEstrageiro: " + usuarioId);
+      
+      const sucesso = await carteira.editarCarteira(carteiraId, novoNome, novaMoeda, novoSaldo, dataEditar);
+  
+      if (sucesso) {
+        setCarteiras(prevCarteiras =>
+          prevCarteiras.map(carteira =>
+            carteira.id === carteiraId
+              ? { ...carteira, nome: novoNome, moeda: novaMoeda, saldo: novoSaldo }
+              : carteira
+          )
+        );
+        setCarteiraEditando(null); 
+      } else {
+        alert("Erro ao editar a carteira. Tente novamente mais tarde.");
+      }
+    } catch (error) {
+      console.error("Erro ao salvar a edição da carteira:", error);
+      alert("Ocorreu um erro ao salvar a edição da carteira.");
+    }
+  };
+  
+  const removerCarteira = async (idCarteira: number) => {
+    try {
+      const carteira = new Vcarteira();
+      const sucesso = await carteira.excluirCarteira(idCarteira);
+  
+      if (sucesso) {
+        console.log("Carteira removida com sucesso.");
+        setErrorMessage("Carteira removida com sucesso.");
+        
+        setCarteiras(carteirasAtuais =>
+          carteirasAtuais.filter(carteira => carteira.id !== idCarteira)
+        );
+      } else {
+        console.error("Erro ao remover a carteira.");
+        alert("Erro ao remover a carteira. Tente novamente mais tarde.");
+      }
+    } catch (error) {
+      console.error("Erro ao remover a carteira:", error);
+      alert("Ocorreu um erro ao remover a carteira.");
+    }
+  };
+
 
   return (
     <div className="container mt-5">
@@ -85,34 +232,103 @@ const Carteira: React.FC = () => {
                 id="saldo"
                 className="form-control"
                 value={saldo}
-                onChange={(e) => setSaldo(e.target.value === '' ? '' : Number(e.target.value))}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setSaldo(value === '' ? 0 : Number(value));
+                }}
                 required
               />
             </div>
-            <div className="mb-3">
-              <label htmlFor="data" className="form-label">Data:</label>
-              <input
-                type="date"
-                id="data"
-                className="form-control"
-                value={data}
-                onChange={(e) => setData(e.target.value)}
-                required
-              />
-            </div>
+
+            {errorMessage && <p className="error-message">{errorMessage}</p>}
+
             <button type="submit" className="btn btn-dark">Adicionar Carteira</button>
+
           </form>
         </div>
       </div>
 
-      <h3>Carteiras Adicionadas</h3>
-      <ul className="list-group">
-        {carteiras.map((carteira) => (
-          <li key={carteira.id} className="list-group-item">
-            {carteira.nome} - {carteira.moeda} {carteira.saldo.toFixed(2)} - {carteira.data}
-          </li>
-        ))}
-      </ul>
+      <div>
+        <h3>Carteiras Adicionadas</h3>
+        {carteiras.length === 0 ? (
+          <p>{mensagemCarteiraVazia}</p>
+        ) : (
+          <ul className="list-group">
+            {carteiras.map((carteira) => (
+              <li
+                key={carteira.id}
+                className="list-group-item d-flex flex-column flex-md-row justify-content-between align-items-center mb-2"
+              >
+                {carteiraEditando === carteira.id ? (
+                  <div className="d-flex flex-column flex-md-row w-100">
+                    <input
+                      type="text"
+                      value={novoNome}
+                      onChange={(e) => setNovoNome(e.target.value)}
+                      className="form-control me-2 mb-2 mb-md-0"
+                    />
+                    <select
+                      value={novaMoeda}
+                      onChange={(e) => setNovaMoeda(e.target.value)}
+                      className="form-select me-2 mb-2 mb-md-0"
+                    >
+                      {moedas.map((moeda) => (
+                        <option key={moeda} value={moeda}>
+                          {moeda}
+                        </option>
+                      ))}
+                    </select>
+                    <input
+                      type="number"
+                      value={novoSaldo}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setNovoSaldo(value === '' ? 0 : Number(value) || 0);
+                      }}
+                      className="form-control me-2 mb-2 mb-md-0"
+                    />
+                    <button className="btn btn-dark" onClick={() => handleSalvarEdicao(carteira.id)}>
+                      Salvar
+                    </button>
+                  </div>
+                ) : (
+                  <div className="d-flex flex-column flex-md-row w-100 justify-content-between align-items-center">
+                    <div className="d-flex flex-column flex-md-row w-100 text-truncate">
+                      <strong>{carteira.nome}</strong>
+                      <i className="fas fa-coins ms-2 text-muted"></i>
+                      <span className="ms-2 text-muted">{carteira.moeda}</span>
+                      <i className="fas fa-dollar-sign ms-2 text-primary"></i>
+                      <span className="ms-2 text-primary">
+                        R${carteira.saldo.toFixed(2)}
+                      </span>
+                      <i className="fas fa-calendar-alt ms-2 text-secondary"></i>
+                      <span className="ms-2 text-secondary">
+                        {format(new Date(carteira.data), 'dd MMMM yyyy, HH:mm:ss')}
+                      </span>
+                    </div>
+
+                    <div className="d-flex flex-wrap justify-content-end mt-2 mt-md-0 w-100">
+                      <button
+                        className="btn btn-dark btn-sm me-2 mb-2 mb-md-0"
+                        onClick={() => handleEditarClique(carteira)}
+                      >
+                        Editar
+                      </button>
+                      <button
+                        className="btn btn-secondary btn-sm mb-2 mb-md-0"
+                        onClick={() => removerCarteira(carteira.id)}
+                      >
+                        Remover
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
     </div>
   );
 };
