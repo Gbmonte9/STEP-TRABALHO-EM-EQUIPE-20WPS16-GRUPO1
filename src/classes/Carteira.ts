@@ -189,12 +189,6 @@ class Carteira {
         }
     }
 
-    atualizarSaldoCarteira(saldo: number): boolean {
-        //this.setSaldo(saldo);
-        console.log("Saldo da carteira atualizado com sucesso.");
-        return true;
-    }
-
     public async localizarCarteira(id: number): Promise<boolean> {
 
         const url = `http://localhost:5000/carteira/${id}`;  

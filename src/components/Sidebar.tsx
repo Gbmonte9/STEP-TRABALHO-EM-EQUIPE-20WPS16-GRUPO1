@@ -15,6 +15,11 @@ const Sidebar = () => {
           </Link>
         </li>
         <li className="nav-item p-0">
+          <Link className="nav-link text-start" to="/carteira">
+            <i className="bi bi-people"></i> Carteira
+          </Link>
+        </li>
+        <li className="nav-item p-0">
           <Link className="nav-link text-start" to="/fontes-renda">
             <i className="bi bi-calendar"></i> Renda
           </Link>
@@ -22,11 +27,6 @@ const Sidebar = () => {
         <li className="nav-item p-0">
           <Link className="nav-link text-start" to="/despesa">
             <i className="bi bi-calendar"></i> Despesas
-          </Link>
-        </li>
-        <li className="nav-item p-0">
-          <Link className="nav-link text-start" to="/carteira">
-            <i className="bi bi-people"></i> Carteira
           </Link>
         </li>
         <li className="nav-item p-0">

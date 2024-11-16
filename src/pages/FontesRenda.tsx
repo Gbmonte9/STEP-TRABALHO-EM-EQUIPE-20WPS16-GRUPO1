@@ -1,5 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import Renda from '../classes/FonteDeRenda.ts';
+import { v4 as uuidv4 } from 'uuid';
+import { format } from 'date-fns';
 
 interface FonteRenda {
   id: number;
@@ -23,31 +26,188 @@ const FontesRenda: React.FC = () => {
   const [fontes, setFontes] = useState<FonteRenda[]>([]);
   const [nome, setNome] = useState('');
   const [valor, setValor] = useState<number | ''>(''); 
-  const [data, setData] = useState('');
   const [categoria, setCategoria] = useState(categorias[0]);
-  const usuarioId = 1; 
+  const [usuarioId, setUsuarioId] = useState<number | null>(null);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [mensagemRendaVazia, setMensagemRendaVazia] = useState("");
+  const [rendaEditando, setRendaEditando] = useState(null);
+  const [novoNome, setNovoNome] = useState('');
+  const [novoCategoria, setNovoCategoria] = useState('');
+  const [novaValor, setNovaValor] = useState<number>(0); 
+  
+  function uuidToNumber(uuid: string): number {
+    let hash = 0;
+    for (let i = 0; i < uuid.length; i++) {
+      const char = uuid.charCodeAt(i);
+      hash = (hash << 5) - hash + char;
+      hash = hash & hash;
+    }
+    return Math.abs(hash);
+  }
+
+  useEffect(() => {
+    const storedId = localStorage.getItem('usuarioId');
+    if (storedId) {
+      setUsuarioId(parseInt(storedId, 10));
+    }
+  }, []);
+
+  useEffect(() => {
+    const carregarRendas = async () => {
+        if (usuarioId !== null && usuarioId !== undefined) {  
+            try {
+                const rendaInstance = new Renda();
+                const rendasAtualizadas = await rendaInstance.listarRenda(usuarioId);
+
+                if (rendasAtualizadas.length === 0) {
+                    setMensagemRendaVazia("Você ainda não possui carteiras.");
+                } else {
+                    setMensagemRendaVazia(""); 
+                }
+
+                setFontes(rendasAtualizadas.map((renda) => ({
+                  id: renda.getId(),
+                  nome: renda.getNome(),
+                  valor: renda.getValor(),
+                  categoria: renda.getCategoria(),
+                  data: renda.getData() && !isNaN(renda.getData().getTime())
+                  ? renda.getData().toISOString()
+                  : new Date().toISOString(), 
+                  dataEdicao: renda.getDataEditar() && !isNaN(renda.getDataEditar().getTime())
+                  ? renda.getDataEditar().toISOString()
+                  : new Date().toISOString(),
+                  usuarioId: renda.getUsuarioId(),
+                })));
+
+            } catch (error) {
+                console.error("Erro ao listar carteiras:", error);
+                setMensagemRendaVazia("Erro ao carregar carteiras.");
+            }
+        } else {
+            console.warn("usuarioId está indefinido ou é nulo");
+        }
+    };
+
+    carregarRendas();
+  }, [usuarioId]);
+
 
   const adicionarFonte = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (nome && valor !== '' && data && categoria) {
-      const novaFonte: Omit<FonteRenda, 'id'> = {
-        nome,
-        valor: Number(valor),
-        data,
-        categoria,
-        usuarioId,
-      };
+    
+    if(!usuarioId) {
+      console.error("Erro: ID de usuário não encontrado.");
+      setErrorMessage("Erro: ID de usuário não encontrado.");
+      return;
+    }
 
-      const idGerado = Math.floor(Math.random() * 1000); 
-      const fonteComId: FonteRenda = { ...novaFonte, id: idGerado };
+    if(!nome || !valor || categoria === undefined) {
+      console.error("Erro: Todos os campos devem ser preenchidos.");
+      setErrorMessage("Erro: Todos os campos devem ser preenchidos.");
+      return;
+    }
 
-      setFontes([...fontes, fonteComId]);
-      setNome('');
-      setValor('');
-      setData('');
-      setCategoria(categorias[0]);
+      try {
+
+          const id = uuidToNumber(uuidv4()); 
+          const dataAtual = new Date(); 
+
+          const novaRenda = new Renda(id, nome, valor, categoria, dataAtual, dataAtual, usuarioId);
+
+          const sucesso = await novaRenda.adicionarRenda();
+
+          if (sucesso) {
+
+            console.log("Fonte adicionada com sucesso.");
+            setErrorMessage("Fonte adicionada com sucesso.");
+
+              const rendaInstance = new Renda();
+              const rendasAtualizadas = await rendaInstance.listarRenda(usuarioId);
+
+              setFontes(rendasAtualizadas.map((renda) => ({
+                id: renda.getId(),
+                nome: renda.getNome(),
+                valor: renda.getValor(),
+                categoria: renda.getCategoria(),
+                data: renda.getData() && !isNaN(renda.getData().getTime())
+                ? renda.getData().toISOString()
+                : new Date().toISOString(), 
+                dataEdicao: renda.getDataEditar() && !isNaN(renda.getDataEditar().getTime())
+                ? renda.getDataEditar().toISOString()
+                : new Date().toISOString(),
+                usuarioId: renda.getUsuarioId(),
+              })));
+
+              setNome("");
+              setValor("");
+              setCategoria('');
+
+          } else {
+              console.error("Erro ao adicionar renda.");
+          }
+      } catch (error) {
+          console.error("Erro ao adicionar renda:", error);
+      }
+
+  };
+
+  const handleEditarClique = (fonte: any) => {
+    setRendaEditando(fonte.id);
+    setNovoNome(fonte.nome);
+    setNovaValor(fonte.valor);
+    setNovoCategoria(fonte.categoria);
+  };
+
+  const handleSalvarEdicao = async (rendaId: number) => {
+    try {
+      const renda = new Renda();
+      const dataEditar = new Date(); 
+
+      console.log("ID: " + rendaId);
+      console.log("IDEstrageiro: " + usuarioId);
+      
+      const sucesso = await renda.editarRenda(rendaId, novoNome, novoCategoria, novaValor, dataEditar);
+  
+      if (sucesso) {
+        setFontes(prevRendas =>
+          prevRendas.map(renda =>
+            renda.id === rendaId
+              ? { ...renda, nome: novoNome, categoria: novoCategoria, valor: novaValor }
+              : renda
+          )
+        );
+        setRendaEditando(null); 
+      } else {
+        alert("Erro ao editar a renda. Tente novamente mais tarde.");
+      }
+    } catch (error) {
+      console.error("Erro ao salvar a edição da renda:", error);
+      alert("Ocorreu um erro ao salvar a edição da renda.");
     }
   };
+  
+  const removerFonte = async (idFonte: number) => {
+    try {
+      const fonte = new Renda();
+      const sucesso = await fonte.excluirFonte(idFonte);
+  
+      if (sucesso) {
+        console.log("Carteira removida com sucesso.");
+        setErrorMessage("Carteira removida com sucesso.");
+        
+        setFontes(fontesAtuais =>
+          fontesAtuais.filter(fonte => fonte.id !== idFonte)
+        );
+      } else {
+        console.error("Erro ao remover a carteira.");
+        alert("Erro ao remover a fonte. Tente novamente mais tarde.");
+      }
+    } catch (error) {
+      console.error("Erro ao remover a carteira:", error);
+      alert("Ocorreu um erro ao remover a fonte.");
+    }
+  };
+
 
   return (
     <div className="container mt-5">
@@ -67,28 +227,6 @@ const FontesRenda: React.FC = () => {
               />
             </div>
             <div className="mb-3">
-              <label htmlFor="valor" className="form-label">Valor:</label>
-              <input
-                type="number"
-                id="valor"
-                className="form-control"
-                value={valor}
-                onChange={(e) => setValor(e.target.value === '' ? '' : Number(e.target.value))}
-                required
-              />
-            </div>
-            <div className="mb-3">
-              <label htmlFor="data" className="form-label">Data:</label>
-              <input
-                type="date"
-                id="data"
-                className="form-control"
-                value={data}
-                onChange={(e) => setData(e.target.value)}
-                required
-              />
-            </div>
-            <div className="mb-3">
               <label htmlFor="categoria" className="form-label">Categoria:</label>
               <select
                 id="categoria"
@@ -103,19 +241,119 @@ const FontesRenda: React.FC = () => {
                 ))}
               </select>
             </div>
+            <div className="mb-3">
+              <label htmlFor="valor" className="form-label">Valor:</label>
+              <input
+                type="number"
+                id="valor"
+                className="form-control"
+                value={valor}
+                onChange={(e) => setValor(e.target.value === '' ? '' : Number(e.target.value))}
+                required
+              />
+            </div>
+
+            {errorMessage && <p className="error-message">{errorMessage}</p>}
+
             <button type="submit" className="btn btn-dark">Adicionar Fonte</button>
+          
           </form>
         </div>
       </div>
 
-      <h3>Fontes de Renda Adicionadas</h3>
-      <ul className="list-group">
-        {fontes.map((fonte) => (
-          <li key={fonte.id} className="list-group-item">
-            {fonte.nome} - R$ {fonte.valor.toFixed(2)} - {fonte.data} - {fonte.categoria}
-          </li>
-        ))}
-      </ul>
+      <div>
+        <h3>Fontes de Renda Adicionadas</h3>
+        {fontes.length === 0 ? (
+          <p>{mensagemRendaVazia}</p>
+        ) : (
+          <ul className="list-group">
+            {fontes.map((fonte) => (
+              <li
+                key={fonte.id}
+                className="list-group-item d-flex flex-column flex-md-row justify-content-between align-items-center mb-2"
+              >
+                {rendaEditando === fonte.id ? (
+                  <div className="d-flex flex-column flex-md-row w-100">
+                    <input
+                      type="text"
+                      value={novoNome}
+                      onChange={(e) => setNovoNome(e.target.value)}
+                      className="form-control me-2 mb-2 mb-md-0"
+                    />
+                    <select
+                      value={novoCategoria}
+                      onChange={(e) => setNovoCategoria(e.target.value)}
+                      className="form-select me-2 mb-2 mb-md-0"
+                    >
+                      {categorias.map((cat) => (
+                        <option key={cat} value={cat}>
+                          {cat}
+                        </option>
+                      ))}
+                    </select>
+                    <input
+                      type="number"
+                      value={novaValor}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setNovaValor(value === '' ? 0 : Number(value) || 0);
+                      }}
+                      className="form-control me-2 mb-2 mb-md-0"
+                    />
+                    <button className="btn btn-dark" onClick={() => handleSalvarEdicao(fonte.id)}>
+                      Salvar
+                    </button>
+                  </div>
+                ) : (
+                  <div className="d-flex flex-column flex-md-row w-100 justify-content-between align-items-center">
+                    <div className="d-flex flex-column flex-md-row align-items-center w-100 text-truncate">
+                      <div className="d-flex align-items-center">
+                        <strong>{fonte.nome}</strong>
+                      </div>
+
+                      <div className="d-flex align-items-center ms-2 text-muted">
+                        <i className="fas fa-coins"></i>
+                        <span className="ms-1">
+                          {fonte.categoria}
+                        </span>
+                      </div>
+
+                      <div className="d-flex align-items-center ms-2 text-primary">
+                        <i className="fas fa-dollar-sign"></i>
+                        <span className="ms-1">R${fonte.valor.toFixed(2)}</span>
+                      </div>
+
+                      <div className="d-flex align-items-center ms-2 text-secondary">
+                        <i className="fas fa-calendar-alt"></i>
+                        <span className="ms-1">
+                          {format(new Date(fonte.data), 'dd MMMM yyyy, HH:mm:ss')}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="d-flex flex-wrap justify-content-end mt-2 mt-md-0 w-100">
+                      <button
+                        className="btn btn-dark btn-sm me-2 mb-2 mb-md-0"
+                        onClick={() => handleEditarClique(fonte)}
+                      >
+                        Editar
+                      </button>
+                      <button
+                        className="btn btn-secondary btn-sm mb-2 mb-md-0"
+                        onClick={() => removerFonte(fonte.id)}
+                      >
+                        Remover
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+
     </div>
   );
 };

@@ -15,6 +15,15 @@ interface ICarteira {
   usuarioId: number;
 }
 
+const simbolosMoedas = {
+  BRL: 'R$',
+  USD: '$',
+  EUR: '€',
+  GBP: '£',
+  JPY: '¥'
+};
+
+// Lista de moedas
 const moedas = ['BRL', 'USD', 'EUR', 'GBP', 'JPY'];
 
 const Carteira = () => {
@@ -61,13 +70,17 @@ const Carteira = () => {
                 }
 
                 setCarteiras(carteirasAtualizadas.map((carteira) => ({
-                    id: carteira.getId(),
-                    nome: carteira.getNome(),
-                    moeda: carteira.getMoeda(),
-                    saldo: carteira.getSaldo(),
-                    data: carteira.getDataCriacao().toISOString(),
-                    dataEdicao: carteira.getDataEdicao().toISOString(),
-                    usuarioId: carteira.getUsuarioId(),
+                  id: carteira.getId(),
+                  nome: carteira.getNome(),
+                  moeda: carteira.getMoeda(),
+                  saldo: carteira.getSaldo(),
+                  data: carteira.getDataCriacao() && !isNaN(carteira.getDataCriacao().getTime())
+                  ? carteira.getDataCriacao().toISOString()
+                  : new Date().toISOString(), 
+                  dataEdicao: carteira.getDataEdicao() && !isNaN(carteira.getDataEdicao().getTime())
+                  ? carteira.getDataEdicao().toISOString()
+                  : new Date().toISOString(),
+                  usuarioId: carteira.getUsuarioId(),
                 })));
 
             } catch (error) {
@@ -115,13 +128,17 @@ const Carteira = () => {
             const carteirasAtualizadas = await vcarteiraInstance.listarCarteiras(usuarioId);
 
             setCarteiras(carteirasAtualizadas.map((carteira) => ({
-                id: carteira.getId(),
-                nome: carteira.getNome(),
-                moeda: carteira.getMoeda(),
-                saldo: carteira.getSaldo(),
-                data: carteira.getDataCriacao().toISOString(),
-                dataEdicao: carteira.getDataEdicao().toISOString(),
-                usuarioId: carteira.getUsuarioId(),
+              id: carteira.getId(),
+              nome: carteira.getNome(),
+              moeda: carteira.getMoeda(),
+              saldo: carteira.getSaldo(),
+              data: carteira.getDataCriacao() && !isNaN(carteira.getDataCriacao().getTime())
+              ? carteira.getDataCriacao().toISOString()
+              : new Date().toISOString(), 
+              dataEdicao: carteira.getDataEdicao() && !isNaN(carteira.getDataEdicao().getTime())
+              ? carteira.getDataEdicao().toISOString()
+              : new Date().toISOString(),
+              usuarioId: carteira.getUsuarioId(),
             })));
 
             setNome("");
@@ -293,18 +310,29 @@ const Carteira = () => {
                   </div>
                 ) : (
                   <div className="d-flex flex-column flex-md-row w-100 justify-content-between align-items-center">
-                    <div className="d-flex flex-column flex-md-row w-100 text-truncate">
-                      <strong>{carteira.nome}</strong>
-                      <i className="fas fa-coins ms-2 text-muted"></i>
-                      <span className="ms-2 text-muted">{carteira.moeda}</span>
-                      <i className="fas fa-dollar-sign ms-2 text-primary"></i>
-                      <span className="ms-2 text-primary">
-                        R${carteira.saldo.toFixed(2)}
-                      </span>
-                      <i className="fas fa-calendar-alt ms-2 text-secondary"></i>
-                      <span className="ms-2 text-secondary">
-                        {format(new Date(carteira.data), 'dd MMMM yyyy, HH:mm:ss')}
-                      </span>
+                    <div className="d-flex flex-column flex-md-row align-items-center w-100 text-truncate">
+                      <div className="d-flex align-items-center">
+                        <strong>{carteira.nome}</strong>
+                      </div>
+
+                      <div className="d-flex align-items-center ms-2 text-muted">
+                        <i className="fas fa-coins"></i>
+                        <span className="ms-1">
+                          {carteira.moeda}
+                        </span>
+                      </div>
+
+                      <div className="d-flex align-items-center ms-2 text-primary">
+                        <i className="fas fa-dollar-sign"></i>
+                        <span className="ms-1">R${carteira.saldo.toFixed(2)}</span>
+                      </div>
+
+                      <div className="d-flex align-items-center ms-2 text-secondary">
+                        <i className="fas fa-calendar-alt"></i>
+                        <span className="ms-1">
+                          {format(new Date(carteira.data), 'dd MMMM yyyy, HH:mm:ss')}
+                        </span>
+                      </div>
                     </div>
 
                     <div className="d-flex flex-wrap justify-content-end mt-2 mt-md-0 w-100">
