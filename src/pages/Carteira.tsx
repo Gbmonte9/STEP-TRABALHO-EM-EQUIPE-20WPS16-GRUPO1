@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import Vcarteira from '../classes/Carteira';
+import Vcarteira from '../classes/Carteira.ts';
 import { v4 as uuidv4 } from 'uuid';
 import { format } from 'date-fns';
 import '../styles/Carteira.css';

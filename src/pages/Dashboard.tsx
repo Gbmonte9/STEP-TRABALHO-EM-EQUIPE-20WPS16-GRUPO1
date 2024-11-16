@@ -1,27 +1,126 @@
-import React from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import Carteira from '../classes/Carteira.ts';
+import Despesa from '../classes/Despesa.ts';
+import Renda from '../classes/FonteDeRenda.ts';
+
+import '../styles/Carteira.css';
+
+type CarteiraSimplificada = {
+  id: number;
+  nome: string;
+  moeda: string;
+  saldo: number;
+  data: string;
+  dataEdicao: string;
+  usuarioId: number;
+};
+
+interface DespesaSimplificada {
+  id: number;
+  descricao: string;
+  categoria: string;
+  valor: number;
+  date: string;
+  carteiraId: number; 
+  usuarioId: number;
+};
+
+interface RendaSimplificada {
+  id: number;
+  nome: string;
+  valor: number;
+  data: string;
+  categoria: string;
+  usuarioId: number; 
+};
 
 const Dashboard: React.FC = () => {
-  
-  const carteiras = [
-    { id: 1, nome: 'Carteira Principal', moeda: 'BRL', saldo: 1500.75, data: '2024-11-05', usuarioId: 1 },
-    { id: 2, nome: 'Investimentos', moeda: 'BRL', saldo: 5000.00, data: '2024-11-05', usuarioId: 1 },
-  ];
+  const [carteiras, setCarteiras] = useState<CarteiraSimplificada[]>([]);
+  const [despesas, setDespesas] = useState<DespesaSimplificada[]>([]);
+  const [rendas, setRendas] = useState<RendaSimplificada[]>([]);
+  const [usuarioId, setUsuarioId] = useState<number | null>(null);
 
-  const despesas = [
-    { id: 1, descricao: 'Supermercado', valor: 250.00, data: '2024-11-04', categoria: 'Alimentação', carteiraId: 1 },
-    { id: 2, descricao: 'Academia', valor: 120.00, data: '2024-11-03', categoria: 'Saúde', carteiraId: 1 },
-    { id: 3, descricao: 'Transporte', valor: 45.00, data: '2024-11-02', categoria: 'Transporte', carteiraId: 1 },
-  ];
+  useEffect(() => {
+    const storedId = localStorage.getItem('usuarioId');
+    if (storedId) {
+      setUsuarioId(parseInt(storedId, 10));
+    }
+  }, []);
 
-  const fontesRenda = [
-    { id: 1, nome: 'Salário', valor: 3000.00, data: '2024-10-30', categoria: 'Salário', usuarioId: 1 },
-    { id: 2, nome: 'Freelance', valor: 500.00, data: '2024-10-25', categoria: 'Freelance', usuarioId: 1 },
-  ];
+  const loadData = async (usuarioId: number) => {
+    try {
+      const carteiraInstance = new Carteira();
+      const carteirasAtualizadas = await carteiraInstance.listarCarteiras(usuarioId);
+      setCarteiras(carteirasAtualizadas.map(carteira => ({
+        id: carteira.getId(),
+        nome: carteira.getNome(),
+        moeda: carteira.getMoeda(),
+        saldo: carteira.getSaldo(),
+        data: formatDate(carteira.getDataCriacao()),
+        dataEdicao: formatDate(carteira.getDataEdicao()),
+        usuarioId: carteira.getUsuarioId(),
+      })));
 
-  const saldoTotalCarteiras = carteiras.reduce((total, carteira) => total + carteira.saldo, 0);
-  const totalDespesas = despesas.reduce((total, despesa) => total + despesa.valor, 0);
-  const totalRenda = fontesRenda.reduce((total, fonte) => total + fonte.valor, 0);
+      const despesaInstance = new Despesa();
+      const despesaAtualizadas = await despesaInstance.listarDespesa(usuarioId);
+      setDespesas(despesaAtualizadas.map(despesa => ({
+        id: despesa.getId(),
+        descricao: despesa.getDescricao(),
+        valor: despesa.getValor(),
+        categoria: despesa.getDespensa(),
+        data: formatDate(despesa.getData()),
+        dataEdicao: formatDate(despesa.getDataEditar()),
+        carteiraId: despesa.getCarteiraId(),
+        usuarioId: despesa.getUsuarioId(),
+        date: formatDate(despesa.getData())
+      })))
+
+
+      const rendaInstance = new Renda();
+      const rendasAtualizadas = await rendaInstance.listarRenda(usuarioId);
+      setRendas(rendasAtualizadas.map(renda => ({
+        id: renda.getId(),
+        nome: renda.getNome(),
+        valor: renda.getValor(),
+        categoria: renda.getCategoria(),
+        data: formatDate(renda.getData()),
+        dataEdicao: formatDate(renda.getDataEditar()),
+        usuarioId: renda.getUsuarioId(),
+      })));
+    } catch (error) {
+      console.error('Erro ao carregar os dados:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (usuarioId) {
+      loadData(usuarioId);
+    }
+  }, [usuarioId]);
+
+  const formatDate = (date: Date | undefined): string => {
+    return date && !isNaN(date.getTime()) ? date.toISOString() : new Date().toISOString();
+  };
+
+  const saldoTotalCarteiras = useMemo(() => carteiras.reduce((total, carteira) => total + carteira.saldo, 0), [carteiras]);
+
+  const totalDespesas = useMemo(() => {
+    const total = despesas.reduce((acc, despesa) => {
+      const valor = Number(despesa.valor) || 0;
+      return acc + valor;
+    }, 0);
+    return total;
+  }, [despesas]);
+
+  const formatTotalDespesas = (total: number) => {
+    return isNaN(total) ? 0 : total.toFixed(2);
+  };
+
+  const totalRenda = useMemo(() => 
+    rendas.reduce((total, fonte) => total + fonte.valor, 0), 
+    [rendas]
+  );
 
   return (
     <div className="container mt-5">
@@ -41,7 +140,9 @@ const Dashboard: React.FC = () => {
           <div className="card text-white bg-secondary mb-3">
             <div className="card-header">Total de Despesas</div>
             <div className="card-body">
-              <h4 className="card-title">R$ {totalDespesas.toFixed(2)}</h4>
+              <h4 className="card-title">
+                R$ {formatTotalDespesas(totalDespesas)}
+              </h4>
             </div>
           </div>
         </div>
@@ -59,26 +160,34 @@ const Dashboard: React.FC = () => {
       <div className="row mt-4">
         <div className="col-md-6">
           <h4>Despesas Recentes</h4>
-          <ul className="list-group">
-            {despesas.slice(0, 5).map((despesa) => (
-              <li key={despesa.id} className="list-group-item d-flex justify-content-between align-items-center">
-                {despesa.descricao} - R$ {despesa.valor.toFixed(2)}
-                <span className="badge bg-secondary rounded-pill">{despesa.categoria}</span>
-              </li>
-            ))}
-          </ul>
+          {despesas.length > 0 ? (
+            <ul className="list-group">
+              {despesas.slice(0, 5).map((despesa) => (
+                <li key={despesa.id} className="list-group-item d-flex justify-content-between align-items-center">
+                  {despesa.descricao} - R$ {Number(despesa.valor).toFixed(2)} 
+                  <span className="badge bg-secondary rounded-pill">{despesa.categoria}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>Nenhuma despesa registrada.</p>
+          )}
         </div>
 
         <div className="col-md-6">
           <h4>Fontes de Renda Recentes</h4>
-          <ul className="list-group">
-            {fontesRenda.slice(0, 5).map((fonte) => (
-              <li key={fonte.id} className="list-group-item d-flex justify-content-between align-items-center">
-                {fonte.nome} - R$ {fonte.valor.toFixed(2)}
-                <span className="badge bg-dark rounded-pill">{fonte.categoria}</span>
-              </li>
-            ))}
-          </ul>
+          {rendas.length > 0 ? (
+            <ul className="list-group">
+              {rendas.slice(0, 5).map((renda) => (
+                <li key={renda.id} className="list-group-item d-flex justify-content-between align-items-center">
+                  {renda.nome} - R$ {renda.valor.toFixed(2)}
+                  <span className="badge bg-dark rounded-pill">{renda.categoria}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>Nenhuma fonte de renda registrada.</p>
+          )}
         </div>
       </div>
     </div>
