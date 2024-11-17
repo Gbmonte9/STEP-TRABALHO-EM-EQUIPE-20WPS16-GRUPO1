@@ -23,7 +23,7 @@ const TopNavBar = () => {
         <div className="container-fluid">
           <div className="d-flex align-items-center justify-content-end w-100">
             <span className="me-2">{usuarioNome}</span>
-            <span className="me-2">{usuarioId}</span>
+            <span className="d-none">{usuarioId}</span>
             <img src={img} alt="Profile" className="rounded-circle" width="40" height="40" />
           </div>
         </div>

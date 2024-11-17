@@ -166,7 +166,7 @@ class FonteDeRenda {
         
         try {
             const response = await fetch(url, {
-                method: 'GET',  // Método GET para busca
+                method: 'GET',  
                 headers: {
                     'Content-Type': 'application/json',  
                 },

@@ -37,9 +37,9 @@
       "id": "1732055666",
       "nome": "G19",
       "moeda": "BRL",
-      "saldo": 111,
-      "dataCriacao": "2024-11-15T18:11:20.124Z",
-      "dataEdicao": "2024-11-15T18:11:20.124Z",
+      "saldo": 250,
+      "dataEditar": "2024-11-17T03:56:07.309Z",
+      "data": "2024-11-15T18:11:20.124Z",
       "usuarioId": "876244386"
     },
     {
@@ -223,6 +223,5 @@
       "carteiraId": "876244386",
       "usuarioId": 0
     }
-  ],
-  "relatorio": {}
+  ]
 }

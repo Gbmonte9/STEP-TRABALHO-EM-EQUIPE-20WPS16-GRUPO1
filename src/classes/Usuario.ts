@@ -210,44 +210,74 @@ class Usuario {
 
     }
 
-    async editarCarteira(id: number, nome: string, moeda: string, saldo: number, dataEditar: Date, usuarioId: number): Promise<boolean> {
-        if (!id) {
-            console.error("ID da carteira não encontrado!");
-            return false;
-        }
-    
-        console.log("Editando carteira...");
-        console.log('Usuario ID antes de editar:', usuarioId);  // Verifique o valor
-    
-        const url = `http://localhost:5000/carteira/${id}`;
-    
-        const corpoRequisicao = {
-            id: id,  // Se você precisa enviar o id da instância atual
-            nome: nome,
-            moeda: moeda,
-            saldo : saldo,
-            dataCriacao: this.getDataCadastro(),
-            dataEditar : dataEditar,
-            usuarioId : usuarioId,
-        };
-    
-        console.log('Corpo da requisição:', corpoRequisicao);  // Depuração do corpo
-    
+    async excluirConta(usuarioId: number): Promise<boolean> {
+        console.log(`Excluindo conta de usuário com ID: ${usuarioId}`);
+        
+        const url = `http://localhost:5000/usuarios/${usuarioId}`; 
+        
         try {
             const response = await fetch(url, {
-                method: 'PUT', // ou 'PATCH', dependendo da sua API
+                method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(corpoRequisicao),
             });
     
-            if (response.ok) {
-                console.log('Carteira editada com sucesso!');
+            if (response.status === 200) {
+                console.log('Conta do usuário excluída com sucesso!');
                 return true;
             } else {
                 const errorData = await response.json();
-                console.error('Erro ao editar a carteira:', errorData.message || response.statusText);
+                console.error('Erro ao excluir a conta do usuário:', errorData.message || response.statusText);
+                return false;
+            }
+        } catch (error) {
+            console.error('Erro de conexão:', error);
+            return false;
+        }
+    }
+
+    async editarUsuario(
+        usuarioId: number, 
+        nome: string, 
+        email: string, 
+        senha: string, 
+        dataEditar: Date
+    ): Promise<boolean> {
+        console.log(`Editando usuário com ID: ${usuarioId}`);
+    
+        const usuario = await this.localizarUsuario(usuarioId);
+        if (!usuario) {
+            console.error(`Usuário com ID ${usuarioId} não encontrado.`);
+            return false;
+        }
+    
+        const url = `http://localhost:5000/usuarios/${usuarioId}`; 
+        
+        const dadosAtualizados = {
+            id: this.getId(), 
+            nome,
+            email,
+            senha,
+            dataCadastro: this.getDataCadastro(),
+            dataEditar: dataEditar.toISOString(), 
+        };
+        
+        try {
+            const response = await fetch(url, {
+                method: 'PUT', 
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(dadosAtualizados),
+            });
+    
+            if (response.status === 200) {
+                console.log('Usuário editado com sucesso!');
+                return true;
+            } else {
+                const errorData = await response.json();
+                console.error('Erro ao editar o usuário:', errorData.message || response.statusText);
                 return false;
             }
         } catch (error) {
