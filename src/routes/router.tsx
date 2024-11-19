@@ -8,9 +8,9 @@ import ErrorPage from "./error-page";
 
 const router = createBrowserRouter([
   {
-    path: "/login",
+    path: "/",
     element: <LoginLayout />,
-    children: [{ path: "/login", element: <Login /> }],
+    children: [{ path: "/", element: <Login /> }],
   },
   {
     path: "/cadastro",
@@ -22,7 +22,7 @@ const router = createBrowserRouter([
     element: <Root />,
     errorElement: <ErrorPage />,
     children: [
-      { path: "/", element: <Dashboard /> },
+      { path: "dashboard", element: <Dashboard /> },
       { path: "fontes-renda", element: <FontesRenda /> },
       { path: "carteira", element: <Carteira /> },
       { path: "despesa", element: <Despesa /> },

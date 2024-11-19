@@ -89,7 +89,7 @@ class FonteDeRenda {
                     categoria: this.getCategoria(),
                     data: this.getData(),
                     dataEditar: this.getDataEditar(),
-                    usuario: this.getUsuarioId().toString(),
+                    usuarioId: this.getUsuarioId().toString(),
                 }),
             });
     
@@ -212,8 +212,12 @@ class FonteDeRenda {
             const response = await fetch(`http://localhost:5000/renda?usuarioId=${usuarioId}`);
             
             if (response.ok) {
+
                 const rendasJson = await response.json();
-                return rendasJson.map((renda: any) => new FonteDeRenda(
+                
+                const rendaFiltrada = rendasJson.filter((renda: any) => String(renda.usuarioId) === String(usuarioId));
+
+                return rendaFiltrada.map((renda: any) => new FonteDeRenda(
                     renda.id,
                     renda.nome,
                     renda.valor,
@@ -229,6 +233,43 @@ class FonteDeRenda {
             console.error("Erro na requisição:", error);
             return [];
         }
+    }
+
+    async excluirListaRenda(usuarioId: number): Promise<boolean> {
+    
+        const rendas = await this.listarRenda(usuarioId);
+    
+        for (const renda of rendas) {
+            console.log("Excluindo fonte de renda com ID:", renda.id);
+    
+            const url = `http://localhost:5000/renda/${encodeURIComponent(renda.id)}`;
+    
+            try {
+                const response = await fetch(url, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+    
+                if (response.ok) {
+                    console.log(`Fonte de renda com ID ${renda.id} excluída com sucesso!`);
+                } else {
+                    try {
+                        const errorData = await response.json();
+                        console.error(`Erro ao excluir a fonte de renda com ID ${renda.id}:`, errorData.message || response.statusText);
+                    } catch (error) {
+                        console.error(`Erro ao excluir a fonte de renda com ID ${renda.id}:`, await response.text());
+                    }
+                }
+            } catch (error) {
+                console.error(`Erro de conexão ao excluir a fonte de renda com ID ${renda.id}:`, error instanceof Error ? error.message : error);
+                return false;
+            }
+        }
+    
+        console.log('Todas as fontes de renda do usuário foram excluídas com sucesso!');
+        return true;
     }
 
     async excluirFonte(id: number): Promise<boolean> {

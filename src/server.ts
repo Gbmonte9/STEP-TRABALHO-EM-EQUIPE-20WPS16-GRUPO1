@@ -1,6 +1,6 @@
 import * as http from 'http';
 import { IncomingMessage, ServerResponse } from 'http';
-import { parse } from 'url'; 
+import express, { Request, Response } from 'express';
 
 type Usuario = {
   id: number;
@@ -83,16 +83,18 @@ const requestHandler = async (req: IncomingMessage, res: ServerResponse) => {
     });
 
   } else if (method === 'DELETE' && url?.startsWith('/usuarios/')) {
-    const id = parseInt(url.split('/')[2], 10);
-    const usuarioIndex = usuarios.findIndex((u) => u.id === id);
+    
+    const usuarioId = parseInt(url.split('/')[2], 10);
+
+    const usuarioIndex = usuarios.findIndex((u) => u.id === usuarioId);
 
     if (usuarioIndex !== -1) {
-      usuarios.splice(usuarioIndex, 1); 
-      res.statusCode = 200;
-      res.end(JSON.stringify({ message: 'Usuário excluído com sucesso' }));
+        usuarios.splice(usuarioIndex, 1);  
+        res.statusCode = 200;
+        res.end(JSON.stringify({ message: `Usuário com ID ${usuarioId} removido com sucesso` }));
     } else {
-      res.statusCode = 404;
-      res.end(JSON.stringify({ message: 'Usuário não encontrado' }));
+        res.statusCode = 404;
+        res.end(JSON.stringify({ message: `Usuário com ID ${usuarioId} não encontrado` }));
     }
 
   } else if (method === 'GET' && url === '/carteira') {
@@ -128,17 +130,18 @@ const requestHandler = async (req: IncomingMessage, res: ServerResponse) => {
       res.end(JSON.stringify(novaCarteira));
     });
 
+
   } else if (method === 'DELETE' && url?.startsWith('/carteira/')) {
     const id = parseInt(url.split('/')[2], 10);
-    const index = carteiras.findIndex((c) => c.id === id);
+    const index = carteiras.findIndex((d) => d.id === id);
   
     if (index !== -1) {
-      carteiras.splice(index, 1); 
+      despesas.splice(index, 1); 
       res.statusCode = 200;
-      res.end(JSON.stringify({ message: 'Carteira removida com sucesso' }));
+      res.end(JSON.stringify({ message: 'Carteira removida com sucesso' })); 
     } else {
       res.statusCode = 404;
-      res.end(JSON.stringify({ message: 'Carteira não encontrada' }));
+      res.end(JSON.stringify({ message: 'Carteira não encontrada' })); 
     }
   }
 
@@ -168,191 +171,239 @@ const requestHandler = async (req: IncomingMessage, res: ServerResponse) => {
             res.end(JSON.stringify({ message: 'Carteira não encontrada' }));
         }
     });
-}
-
-else if (method === 'GET' && url === '/despesa') {
-  const requestUrl = req.url ? `http://${req.headers.host}${req.url}` : '';
-  const parsedUrl = new URL(requestUrl);
-
-  const usuarioIdString = parsedUrl.searchParams.get('usuarioId');
-
-  let despesasFiltradas = despesas;
-
-  if (usuarioIdString) {
-    despesasFiltradas = despesasFiltradas.filter(d => String(d.usuarioId) === usuarioIdString);
   }
 
-  res.statusCode = 200;
-  res.end(JSON.stringify(despesasFiltradas)); 
-} 
+  else if (method === 'GET' && url === '/despesa') {
+    const requestUrl = req.url ? `http://${req.headers.host}${req.url}` : '';
+    const parsedUrl = new URL(requestUrl);
 
-else if (method === 'GET' && url?.startsWith('/despesa/')) {
-  const id = parseInt(url.split('/')[2], 10);
-  const despesa = despesas.find((d) => d.id === id);
+    const usuarioIdString = parsedUrl.searchParams.get('usuarioId');
 
-  if (despesa) {
+    let despesasFiltradas = despesas;
+
+    if (usuarioIdString) {
+      despesasFiltradas = despesasFiltradas.filter(d => String(d.usuarioId) === usuarioIdString);
+    }
+
     res.statusCode = 200;
-    res.end(JSON.stringify(despesa));
-  } else {
-    res.statusCode = 404;
-    res.end(JSON.stringify({ message: 'Despesa não encontrada' }));
-  }
-} 
+    res.end(JSON.stringify(despesasFiltradas)); 
+  } 
 
-else if (method === 'GET' && url?.startsWith('/despesa/')) {
-  const usuarioIdString = url.split('/')[2]; 
-  const usuarioId = parseInt(usuarioIdString, 10);
+  else if (method === 'GET' && url?.startsWith('/despesa/')) {
+    const id = parseInt(url.split('/')[2], 10);
+    const despesa = despesas.find((d) => d.id === id);
 
-  if (isNaN(usuarioId)) {
-      res.statusCode = 400;  
-      res.end(JSON.stringify({ message: 'usuarioId inválido' }));
-      return;
-  }
-
-  const despesasFiltradas = despesas.filter(d => d.usuarioId === usuarioId);
-
-  if (despesasFiltradas.length > 0) {
+    if (despesa) {
       res.statusCode = 200;
-      res.end(JSON.stringify(despesasFiltradas)); 
-  } else {
-      res.statusCode = 404;
-      res.end(JSON.stringify({ message: 'Despesas não encontradas para o usuário' }));
-  }
-}
-
-else if (method === 'POST' && url === '/despesa') {
-  let body = '';
-  req.on('data', (chunk) => {
-    body += chunk;
-  });
-
-  req.on('end', () => {
-    const despesaData = JSON.parse(body);
-    const novaDespesa = {
-      id: nextDespesaId++, 
-      ...despesaData,
-      data: new Date(despesaData.data), 
-    };
-    despesas.push(novaDespesa); 
-    res.statusCode = 201;
-    res.end(JSON.stringify(novaDespesa));
-  });
-} 
-
-else if (method === 'PUT' && url?.startsWith('/despesa/')) {
-  const id = parseInt(url.split('/')[2], 10);
-  let body = '';
-
-  req.on('data', (chunk) => {
-    body += chunk;
-  });
-
-  req.on('end', () => {
-    const despesaData = JSON.parse(body);
-    const index = despesas.findIndex((d) => d.id === id);
-
-    if (index !== -1) {
-      
-      despesas[index] = {
-        id,
-        ...despesaData,
-        data: new Date(despesaData.data), 
-      };
-
-      res.statusCode = 200;
-      res.end(JSON.stringify(despesas[index])); 
+      res.end(JSON.stringify(despesa));
     } else {
       res.statusCode = 404;
       res.end(JSON.stringify({ message: 'Despesa não encontrada' }));
     }
-  });
-} 
+  } 
 
-else if (method === 'DELETE' && url?.startsWith('/despesa/')) {
-  const id = parseInt(url.split('/')[2], 10);
-  const index = despesas.findIndex((d) => d.id === id);
+  else if (method === 'GET' && url?.startsWith('/despesa/')) {
+    const usuarioIdString = url.split('/')[2]; 
+    const usuarioId = parseInt(usuarioIdString, 10);
 
-  if (index !== -1) {
-    despesas.splice(index, 1); 
-    res.statusCode = 200;
-    res.end(JSON.stringify({ message: 'Despesa removida com sucesso' })); 
-  } else {
-    res.statusCode = 404;
-    res.end(JSON.stringify({ message: 'Despesa não encontrada' })); 
-  }
-}
+    if (isNaN(usuarioId)) {
+        res.statusCode = 400;  
+        res.end(JSON.stringify({ message: 'usuarioId inválido' }));
+        return;
+    }
 
-else if (method === 'GET' && url === '/renda') {
-  res.statusCode = 200;
-  res.end(JSON.stringify(fontesDeRenda)); 
-} else if (method === 'GET' && url?.startsWith('/renda/')) {
-  const id = parseInt(url.split('/')[2], 10);
-  const fonteDeRenda = fontesDeRenda.find((f) => f.id === id);
+    const despesasFiltradas = despesas.filter(d => d.usuarioId === usuarioId);
 
-  if (fonteDeRenda) {
-    res.statusCode = 200;
-    res.end(JSON.stringify(fonteDeRenda)); 
-  } else {
-    res.statusCode = 404;
-    res.end(JSON.stringify({ message: 'Fonte de Renda não encontrada' }));
+    if (despesasFiltradas.length > 0) {
+        res.statusCode = 200;
+        res.end(JSON.stringify(despesasFiltradas)); 
+    } else {
+        res.statusCode = 404;
+        res.end(JSON.stringify({ message: 'Despesas não encontradas para o usuário' }));
+    }
   }
 
-} else if (method === 'POST' && url === '/renda') {
-  let body = '';
-  req.on('data', (chunk) => {
-    body += chunk;
-  });
+  else if (method === 'POST' && url === '/despesa') {
+    let body = '';
+    req.on('data', (chunk) => {
+      body += chunk;
+    });
 
-  req.on('end', () => {
-    const fonteDeRendaData = JSON.parse(body);
-    const novaFonteDeRenda = {
-      id: nextFonteDeRendaId++, 
-      ...fonteDeRendaData,
-    };
-    fontesDeRenda.push(novaFonteDeRenda);
-    res.statusCode = 201;
-    res.end(JSON.stringify(novaFonteDeRenda)); 
-  });
+    req.on('end', () => {
+      const despesaData = JSON.parse(body);
+      const novaDespesa = {
+        id: nextDespesaId++, 
+        ...despesaData,
+        data: new Date(despesaData.data), 
+      };
+      despesas.push(novaDespesa); 
+      res.statusCode = 201;
+      res.end(JSON.stringify(novaDespesa));
+    });
+  } 
 
-} else if (method === 'PUT' && url?.startsWith('/renda/')) {
-  const id = parseInt(url.split('/')[2], 10);
-  let body = '';
+  else if (method === 'PUT' && url?.startsWith('/despesa/')) {
+    const id = parseInt(url.split('/')[2], 10);
+    let body = '';
 
-  req.on('data', (chunk) => {
-    body += chunk;
-  });
+    req.on('data', (chunk) => {
+      body += chunk;
+    });
 
-  req.on('end', () => {
-    const fonteDeRendaData = JSON.parse(body);
-    const index = fontesDeRenda.findIndex((f) => f.id === id);
+    req.on('end', () => {
+      const despesaData = JSON.parse(body);
+      const index = despesas.findIndex((d) => d.id === id);
+
+      if (index !== -1) {
+        
+        despesas[index] = {
+          id,
+          ...despesaData,
+          data: new Date(despesaData.data), 
+        };
+
+        res.statusCode = 200;
+        res.end(JSON.stringify(despesas[index])); 
+      } else {
+        res.statusCode = 404;
+        res.end(JSON.stringify({ message: 'Despesa não encontrada' }));
+      }
+    });
+  } 
+
+  else if (method === 'DELETE' && url?.startsWith('/despesa/')) {
+    const id = parseInt(url.split('/')[2], 10);
+    const index = despesas.findIndex((d) => d.id === id);
 
     if (index !== -1) {
-      fontesDeRenda[index] = {
-        id,
-        ...fonteDeRendaData,
-      };
-
+      despesas.splice(index, 1); 
       res.statusCode = 200;
-      res.end(JSON.stringify(fontesDeRenda[index])); 
+      res.end(JSON.stringify({ message: 'Despesa removida com sucesso' })); 
+    } else {
+      res.statusCode = 404;
+      res.end(JSON.stringify({ message: 'Despesa não encontrada' })); 
+    }
+  }
+
+  else if (method === 'GET' && url === '/renda') {
+    res.statusCode = 200;
+    res.end(JSON.stringify(fontesDeRenda)); 
+  } else if (method === 'GET' && url?.startsWith('/renda/')) {
+    const id = parseInt(url.split('/')[2], 10);
+    const fonteDeRenda = fontesDeRenda.find((f) => f.id === id);
+
+    if (fonteDeRenda) {
+      res.statusCode = 200;
+      res.end(JSON.stringify(fonteDeRenda)); 
     } else {
       res.statusCode = 404;
       res.end(JSON.stringify({ message: 'Fonte de Renda não encontrada' }));
     }
-  });
 
-} else if (method === 'DELETE' && url?.startsWith('/renda/')) {
-  const id = parseInt(url.split('/')[2], 10);
-  const index = fontesDeRenda.findIndex((f) => f.id === id);
+  } else if (method === 'POST' && url === '/renda') {
+    let body = '';
+    req.on('data', (chunk) => {
+      body += chunk;
+    });
 
-  if (index !== -1) {
-    fontesDeRenda.splice(index, 1); 
-    res.statusCode = 200;
-    res.end(JSON.stringify({ message: 'Fonte de Renda removida com sucesso' })); 
-  } else {
-    res.statusCode = 404;
-    res.end(JSON.stringify({ message: 'Fonte de Renda não encontrada' }));
+    req.on('end', () => {
+      const fonteDeRendaData = JSON.parse(body);
+      const novaFonteDeRenda = {
+        id: nextFonteDeRendaId++, 
+        ...fonteDeRendaData,
+      };
+      fontesDeRenda.push(novaFonteDeRenda);
+      res.statusCode = 201;
+      res.end(JSON.stringify(novaFonteDeRenda)); 
+    });
+
+  } else if (method === 'PUT' && url?.startsWith('/renda/')) {
+    const id = parseInt(url.split('/')[2], 10);
+    let body = '';
+
+    req.on('data', (chunk) => {
+      body += chunk;
+    });
+
+    req.on('end', () => {
+      const fonteDeRendaData = JSON.parse(body);
+      const index = fontesDeRenda.findIndex((f) => f.id === id);
+
+      if (index !== -1) {
+        fontesDeRenda[index] = {
+          id,
+          ...fonteDeRendaData,
+        };
+
+        res.statusCode = 200;
+        res.end(JSON.stringify(fontesDeRenda[index])); 
+      } else {
+        res.statusCode = 404;
+        res.end(JSON.stringify({ message: 'Fonte de Renda não encontrada' }));
+      }
+    });
+
+  } else if (method === 'DELETE' && url?.startsWith('/renda/')) {
+    const id = parseInt(url.split('/')[2], 10);
+    const index = fontesDeRenda.findIndex((f) => f.id === id);
+
+    if (index !== -1) {
+      fontesDeRenda.splice(index, 1); 
+      res.statusCode = 200;
+      res.end(JSON.stringify({ message: 'Fonte de Renda removida com sucesso' })); 
+    } else {
+      res.statusCode = 404;
+      res.end(JSON.stringify({ message: 'Fonte de Renda não encontrada' }));
+    }
   }
+
+  else if (method === 'DELETE' && url?.startsWith('/despesa/')) {
+    const id = parseInt(url.split('/')[2], 10); 
+    const despesaIndex = despesas.findIndex((d) => d.usuarioId === id); 
+
+    if (despesaIndex !== -1) {
+        despesas = despesas.filter(despesa => despesa.usuarioId !== id);  
+        
+        res.statusCode = 200;
+        res.end(JSON.stringify({ message: 'Despesas removidas com sucesso' }));
+    } else {
+        res.statusCode = 404;
+        res.end(JSON.stringify({ message: 'Despesas não encontradas para o usuário' }));
+    }
+  }
+
+  else if (method === 'DELETE' && url?.startsWith('/carteira/')) {
+
+    const id = parseInt(url.split('/')[2], 10);  
+
+    const carteiraIndex = carteiras.findIndex((c) => c.id === id); 
+
+    if (carteiraIndex !== -1) {
+    
+        carteiras = carteiras.filter(carteira => carteira.id !== id);  
+        
+        res.statusCode = 200;
+        res.end(JSON.stringify({ message: 'Carteira removida com sucesso' }));
+    } else {
+        res.statusCode = 404;
+        res.end(JSON.stringify({ message: 'Carteira não encontrada' }));
+    }
 }
+
+  else if (method === 'DELETE' && url?.startsWith('/renda/')) {
+    const id = parseInt(url.split('/')[2], 10); 
+    const rendaIndex = fontesDeRenda.findIndex((r) => r.usuarioId === id); 
+
+    if (rendaIndex !== -1) {
+      fontesDeRenda = fontesDeRenda.filter(fontesDeRenda => fontesDeRenda.usuarioId !== id); 
+        
+        res.statusCode = 200;
+        res.end(JSON.stringify({ message: 'Rendas removidas com sucesso' }));
+    } else {
+        res.statusCode = 404;
+        res.end(JSON.stringify({ message: 'Rendas não encontradas para o usuário' }));
+    }
+  }
 
 };
 

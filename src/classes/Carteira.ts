@@ -148,6 +148,8 @@ class Carteira {
             console.error("Erro ao localizar a carteira:", error);
             return false;
         }
+
+        this.setDataEdicao(dataEditar);
     
         console.log("Editando carteira...");
         console.log('Usuario ID antes de editar:', id);
@@ -159,8 +161,8 @@ class Carteira {
             nome,
             moeda,
             saldo,
-            dataEditar,
-            data: this.getDataCriacao(),
+            dataEditar: this.getDataEdicao(),
+            dataCriacao: this.getDataCriacao(),
             usuarioId: this.getUsuarioId(),
         };
     
@@ -237,13 +239,53 @@ class Carteira {
         }
     }
 
+    async excluirListaCarteira(usuarioId: number): Promise<boolean> {
+    
+        const carteiras = await this.listarCarteiras(usuarioId);
+    
+        for (const carteira of carteiras) {
+            console.log("Excluindo carteira com ID:", carteira.id);
+    
+            const url = `http://localhost:5000/carteira/${encodeURIComponent(carteira.id)}`;
+    
+            try {
+                const response = await fetch(url, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+    
+                if (response.ok) {
+                    console.log(`Carteira com ID ${carteira.id} excluída com sucesso!`);
+                } else {
+                
+                    try {
+                        const errorData = await response.json();
+                        console.error(`Erro ao excluir a carteira com ID ${carteira.id}:`, errorData.message || response.statusText);
+                    } catch (error) {
+                        console.error(`Erro ao excluir a carteira com ID ${carteira.id}:`, await response.text());
+                    }
+                }
+            } catch (error) {
+                console.error(`Erro de conexão ao excluir a carteira com ID ${carteira.id}:`, error instanceof Error ? error.message : error);
+                return false; 
+            }
+        }
+    
+        console.log('Todas as carteiras do usuário foram excluídas com sucesso!');
+        return true;
+    }
 
     public async listarCarteiras(usuarioId: number): Promise<Carteira[]> {
             try {
                 const response = await fetch(`http://localhost:5000/carteira?usuarioId=${usuarioId}`);
                 if (response.ok) {
                     const carteirasJson = await response.json();
-                    return carteirasJson.map((carteira: any) => new Carteira(
+
+                    const carteiraFiltrada = carteirasJson.filter((carteira: any) => String(carteira.usuarioId) === String(usuarioId));
+                    
+                    return carteiraFiltrada.map((carteira: any) => new Carteira(
                         carteira.id,
                         carteira.nome,
                         carteira.moeda,
@@ -260,7 +302,7 @@ class Carteira {
                 console.error("Erro na requisição:", error);
                 return [];
             }
-        }
+    }
     
 
 }

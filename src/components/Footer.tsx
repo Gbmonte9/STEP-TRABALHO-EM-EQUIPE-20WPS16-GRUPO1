@@ -1,5 +1,5 @@
 import React from 'react';
-import '../styles/Footer.css'; // Importação direta sem `styles`
+import '../styles/Footer.css'; 
 
 const Footer: React.FC = () => {
   const currentYear: number = new Date().getFullYear();

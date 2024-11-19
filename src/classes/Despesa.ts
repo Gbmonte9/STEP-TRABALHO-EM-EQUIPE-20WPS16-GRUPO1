@@ -158,6 +158,8 @@ class Despesa {
             console.error("Erro ao localizar a despesa:", error);
             return false;
         }
+
+        this.setDataEditar(dataEditar);
     
         console.log("Editando despesa...");
         console.log('ID da despesa antes de editar:', id);
@@ -169,7 +171,7 @@ class Despesa {
             descricao,
             categoria,
             valor,
-            dataEditar: dataEditar.toISOString(),  
+            dataEditar: this.getDataEditar(),  
             data: this.getData(),  
             carteiraId: carteiraId.toString(),  
             usuarioId: this.getUsuarioId().toString()  
@@ -308,6 +310,43 @@ class Despesa {
             console.error("Erro na requisição:", error);
             return [];
         }
+    }
+
+    async excluirListaDespesa(usuarioId: number): Promise<boolean> {
+    
+        const despesas = await this.listarDespesa(usuarioId);
+    
+        for (const despesa of despesas) {
+            console.log("Excluindo despesa com ID:", despesa.id);
+    
+            const url = `http://localhost:5000/despesa/${encodeURIComponent(despesa.id)}`;
+    
+            try {
+                const response = await fetch(url, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+    
+                if (response.ok) {
+                    console.log(`Despesa com ID ${despesa.id} excluída com sucesso!`);
+                } else {
+                    try {
+                        const errorData = await response.json();
+                        console.error(`Erro ao excluir a despesa com ID ${despesa.id}:`, errorData.message || response.statusText);
+                    } catch (error) {
+                        console.error(`Erro ao excluir a despesa com ID ${despesa.id}:`, await response.text());
+                    }
+                }
+            } catch (error) {
+                console.error(`Erro de conexão ao excluir a despesa com ID ${despesa.id}:`, error instanceof Error ? error.message : error);
+                return false;
+            }
+        }
+    
+        console.log('Todas as despesas do usuário foram excluídas com sucesso!');
+        return true;
     }
 
 }

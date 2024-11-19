@@ -45,7 +45,7 @@ const Cadastro = () => {
         setSenha('');
         setConfirmarSenha('');
         setErrorMessage('');
-        navigate('/login');  
+        navigate('/');  
       } else {
         setErrorMessage(novoUsuario.mensagem);
       }
@@ -107,7 +107,7 @@ const Cadastro = () => {
       <button type="submit" className="btn-cadastro">Cadastrar</button>
 
       <div className="cadastro-options">
-        <Link to="/login" className="login-link">Já tem uma conta? Faça login</Link>
+        <Link to="/" className="login-link">Já tem uma conta? Faça login</Link>
       </div>
     </form>
   );

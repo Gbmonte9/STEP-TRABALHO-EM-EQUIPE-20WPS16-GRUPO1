@@ -12,23 +12,21 @@ const Login = () => {
   const handleSubmit = async (e: FormEvent) => {
 
     e.preventDefault();
+
     const usuario = new Usuario();
 
     const isLoggedIn = await usuario.usuarioLogin(email, senha);
 
     if (isLoggedIn) {
-      // Recuperando o id e o nome do usuário
       const usuarioId = usuario.getId();
       const usuarioNome = usuario.getNome();
 
       console.log('Login bem-sucedido, id:', usuarioId, 'nome:', usuarioNome);
 
-      // Armazenar id e nome no localStorage
       localStorage.setItem('usuarioId', usuarioId.toString());
       localStorage.setItem('usuarioNome', usuarioNome);
 
-      // Navegar para a página de destino
-      navigate('/');
+      navigate('/dashboard');
     } else {
       setErrorMessage('Email e Senha invalida.');
     }

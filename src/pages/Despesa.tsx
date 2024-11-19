@@ -3,6 +3,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import Vdespesa from '../classes/Despesa.ts';
 import Vcarteira from '../classes/Carteira.ts';
 import { v4 as uuidv4 } from 'uuid';
+import { format } from 'date-fns';
 
 interface IDespesa {
   id: number;
@@ -10,6 +11,7 @@ interface IDespesa {
   categoria: string;
   valor: string;
   date: string;
+  dataEdicao: string,
   carteiraId: number; 
   usuarioId: number;
 }
@@ -213,18 +215,6 @@ const Despesa: React.FC = () => {
             setValor(0);
             setCategoria('');
 
-            const carregarCarteiras = async () => {
-              try {
-                const respostaCarteiras = await fetch("url-para-obter-carteiras");
-                const carteirasObtidas = await respostaCarteiras.json();
-                setCarteiras(carteirasObtidas);
-              } catch (error) {
-                console.error("Erro ao carregar as carteiras:", error);
-              }
-            };
-
-            carregarCarteiras();
-
         } else {
             console.error("Erro ao adicionar despesa.");
         }
@@ -263,16 +253,17 @@ const Despesa: React.FC = () => {
                     ...despesa,
                     descricao: novoDescricao,
                     categoria: novoCategoria,
-                    valor: novaValor.toString(), 
-                    carteiraId:!isNaN(Number(novaCarteira))
-                    ? Number(novaCarteira)
-                    : despesa.carteiraId ?? despesa.carteiraId,
-
+                    valor: novaValor.toString(),
+                    carteiraId: !isNaN(Number(novaCarteira)) 
+                      ? Number(novaCarteira) 
+                      : despesa.carteiraId, 
+                    dataEditar: dataEditar.toISOString(),
                   }
                 : despesa
             )
           );
           setDespesaEditando(null);
+          window.location.reload();
         } else {
           alert("Erro ao editar a despesa. Tente novamente mais tarde.");
         }
@@ -336,7 +327,7 @@ const Despesa: React.FC = () => {
                   setCarteiraId(Number(selectedId));
                 }}
               >
-                {/* Opção para "Selecionar carteira" */}
+
                 <option value="" disabled={carteiras.length > 0}>Selecionar carteira</option>
 
                 {carteiras.length === 0 ? (
@@ -393,17 +384,29 @@ const Despesa: React.FC = () => {
           <ul className="list-group">
             {despesas.map((despesa) => (
               <li
-                key={despesa.id.toString()} 
-                className="list-group-item d-flex flex-column flex-md-row justify-content-between align-items-center mb-2"
+                key={despesa.id.toString()}
+                className="list-group-item d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-2"
               >
                 {despesaEditando === despesa.id ? (
-                  <div className="d-flex flex-column flex-md-row w-100">
+                  <div className="d-flex flex-column flex-md-row w-100 gap-2">
                     <input
                       type="text"
                       value={novoDescricao}
                       onChange={(e) => setNovoDescricao(e.target.value)}
-                      className="form-control me-2 mb-2 mb-md-0"
+                      className="form-control flex-grow-1"
+                      placeholder="Descrição"
                     />
+                    <select
+                      value={novaCarteira}
+                      onChange={(e) => setNovoCarteira(e.target.value)}
+                      className="form-select me-2 mb-2 mb-md-0"
+                    >
+                      {carteiras.map((cat) => (
+                        <option key={cat.id} value={cat.id}>
+                          {cat.nome}
+                        </option>
+                      ))}
+                    </select>
                     <select
                       value={novoCategoria}
                       onChange={(e) => setNovoCategoria(e.target.value)}
@@ -416,17 +419,6 @@ const Despesa: React.FC = () => {
                         </option>
                       ))}
                     </select>
-                    <select
-                      value={novaCarteira}
-                      onChange={(e) => setNovoCarteira(e.target.value)}
-                      className="form-select me-2 mb-2 mb-md-0"
-                    >
-                      {carteiras.map((cat) => (
-                        <option key={cat.id} value={cat.id}>
-                          {cat.nome}
-                        </option>
-                      ))}
-                    </select>
                     <input
                       type="number"
                       value={novaValor}
@@ -435,6 +427,7 @@ const Despesa: React.FC = () => {
                         setNovaValor(value === '' ? 0 : Number(value) || 0);
                       }}
                       className="form-control me-2 mb-2 mb-md-0"
+                      placeholder="Valor"
                     />
                     <button
                       className="btn btn-dark"
@@ -444,42 +437,53 @@ const Despesa: React.FC = () => {
                     </button>
                   </div>
                 ) : (
-                  <div className="d-flex flex-column flex-md-row w-100 justify-content-between align-items-center">
-                    <div className="d-flex flex-column flex-md-row align-items-center w-100 text-truncate">
+                  <div className="d-flex flex-column flex-md-row w-100 justify-content-between align-items-start align-items-md-center">
+                    <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center text-truncate">
+                      
                       <div className="d-flex align-items-center">
                         <strong>{despesa.descricao}</strong>
                       </div>
-
-                      <div className="d-flex align-items-center ms-2 text-muted">
+      
+                      <div className="d-flex align-items-center ms-md-2 text-muted">
                         <i className="fas fa-coins"></i>
-                        <span className="ms-1">
-                          {despesa.categoria}
-                        </span>
+                        <span className="ms-1">{despesa.categoria}</span>
                       </div>
-
-                      <div className="d-flex align-items-center ms-2 text-primary">
+      
+                      <div className="d-flex align-items-center ms-md-2 text-primary">
                         <i className="fas fa-dollar-sign"></i>
                         <span className="ms-1">
                           R$
                           {(() => {
                             const numericValue = typeof despesa.valor === 'number'
                               ? despesa.valor
-                              : parseFloat(despesa.valor as string);
+                              : parseFloat(despesa.valor);
                             return !isNaN(numericValue) ? numericValue.toFixed(2) : '0.00';
                           })()}
                         </span>
                       </div>
-
-                      <div key={despesa.id} className="d-flex align-items-center ms-2 text-secondary">
-                        <i className="fas fa-coins"></i>
+      
+                      <div className="d-flex align-items-center ms-md-2 text-secondary">
+                        <i className="fas fa-credit-card"></i>
                         <span className="ms-1">
-                        {obterNomeCarteira(despesa.carteiraId || Number(nomeCarteira))}
+                          {obterNomeCarteira(despesa.carteiraId || Number(despesa.carteiraId))}
                         </span>
                       </div>
-
+      
+                      <div className="d-flex align-items-center ms-md-2 text-secondary">
+                        <i className="fas fa-calendar-alt"></i>
+                        <span className="ms-1">
+                          {format(new Date(despesa.date), 'dd MMMM yyyy, HH:mm:ss')}
+                        </span>
+                      </div>
+                      <div className="d-flex align-items-center ms-md-2 text-secondary">
+                        <i className="fas fa-calendar-alt"></i>
+                        <span>
+                          {format(new Date(despesa.dataEdicao), 'dd MMMM yyyy, HH:mm:ss')}
+                        </span>
+                      </div>
                     </div>
-
-                    <div className="d-flex flex-wrap justify-content-end mt-2 mt-md-0 w-100">
+      
+                    <div className="d-flex flex-wrap justify-content-end mt-2 mt-md-0 gap-2">
                       <button
                         className="btn btn-dark btn-sm me-2 mb-2 mb-md-0"
                         onClick={() => handleEditarClique(despesa)}

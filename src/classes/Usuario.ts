@@ -1,5 +1,7 @@
 
 import Carteira from "./Carteira.ts";
+import Despesa from "./Despesa.ts";
+import FonteDeRenda from "./FonteDeRenda.ts";
 
 class Usuario {
     
@@ -88,38 +90,63 @@ class Usuario {
     }
 
     async cadastrarUsuario(): Promise<boolean> {
-    
-        const novoUsuario = {
-
-            id: this.getId().toString(),
-            nome: this.getNome(),
-            email: this.getEmail(),
-            senha: this.getSenha(),
-            data: this.getDataCadastro(),
-            dataEditar : this.getDataEditar()
-
-        };
-
         try {
-        const response = await fetch('http://localhost:5000/usuarios', {
-            method: 'POST',
-            headers: {
-            'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(novoUsuario),
-        });
-
-        if (response.ok) {
-            console.log('Usuário cadastrado com sucesso!');
-            return true;
-        } else {
-            console.error('Erro ao cadastrar usuário.');
+            
+            await this.verificarEmailExiste(this.getEmail());
+    
+            const novoUsuario = {
+                id: this.getId().toString(),
+                nome: this.getNome(),
+                email: this.getEmail(),
+                senha: this.getSenha(),
+                data: this.getDataCadastro(),
+                dataEditar: this.getDataEditar(),
+            };
+    
+            const response = await fetch('http://localhost:5000/usuarios', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(novoUsuario),
+            });
+    
+            if (response.ok) {
+                console.log('Usuário cadastrado com sucesso!');
+                return true;
+            } else {
+                console.error('Erro ao cadastrar usuário.');
+                return false;
+            }
+        } catch (error) {
+            const errorMessage = (error as Error).message || 'Erro de conexão';
+            console.error('Erro:', errorMessage);
+            this.mensagem = errorMessage;
             return false;
         }
+    }
+
+    async verificarEmailExiste(email: string): Promise<void> {
+        try {
+            const response = await fetch(`http://localhost:5000/usuarios?email=${encodeURIComponent(email)}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+    
+            if (response.ok) {
+                const data = await response.json();
+    
+                if (data && data.length > 0) {
+                    throw new Error('Este e-mail já está cadastrado. Tente outro.');
+                }
+            } else {
+                throw new Error('Erro ao verificar e-mail no servidor.');
+            }
         } catch (error) {
-        console.error('Erro de conexão:', error);
-        this.mensagem = 'Erro de conexão';  
-        return false;
+            console.error('Erro ao verificar e-mail:', error);
+            throw error; 
         }
     }
 
@@ -179,7 +206,6 @@ class Usuario {
                 const usuario = await response.json();  
     
                 if (usuario) {
-                    console.log('Usuário encontrado!');
     
                     this.setId(usuario.id);
                     this.setNome(usuario.nome);
@@ -187,10 +213,6 @@ class Usuario {
                     this.setSenha(usuario.senha);
                     this.setData(usuario.data);
                     this.setEditarData(usuario.dataEditar);
-    
-                    console.log('Nome do usuário:', this.getNome());
-                    console.log('Email do usuário:', this.getEmail());
-                    console.log('Senha do usuário:', this.getSenha());
     
                     return true;  
                 } else {
@@ -210,29 +232,60 @@ class Usuario {
 
     }
 
-    async excluirConta(usuarioId: number): Promise<boolean> {
-        console.log(`Excluindo conta de usuário com ID: ${usuarioId}`);
-        
-        const url = `http://localhost:5000/usuarios/${usuarioId}`; 
-        
+    async excluirConta(usuarioId: number | null): Promise<boolean> {
+        console.log(`Excluindo dados do usuário com ID: ${usuarioId}`);
+
+        if (!usuarioId || typeof usuarioId !== 'number') {
+            console.error('ID do usuário inválido ou já excluído.');
+            return false;
+        }
+    
         try {
-            const response = await fetch(url, {
+            const carteira = new Carteira();
+            const carteiraExcluida = await carteira.excluirListaCarteira(usuarioId);
+            if (!carteiraExcluida) {
+                console.error('Falha ao excluir as carteiras.');
+                return false;
+            }
+    
+            const despesa = new Despesa();
+            const despesaExcluida = await despesa.excluirListaDespesa(usuarioId);
+            if (!despesaExcluida) {
+                console.error('Falha ao excluir as despesas.');
+                return false;
+            }
+    
+            const renda = new FonteDeRenda();
+            const rendaExcluida = await renda.excluirListaRenda(usuarioId);
+            if (!rendaExcluida) {
+                console.error('Falha ao excluir as fontes de renda.');
+                return false;
+            }
+    
+            const urlUsuario = `http://localhost:5000/usuarios/${usuarioId}`;
+            const responseUsuario = await fetch(urlUsuario, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
                 },
             });
     
-            if (response.status === 200) {
-                console.log('Conta do usuário excluída com sucesso!');
-                return true;
-            } else {
-                const errorData = await response.json();
-                console.error('Erro ao excluir a conta do usuário:', errorData.message || response.statusText);
+            if (!responseUsuario.ok) {
+                const errorText = await responseUsuario.text();
+                console.error('Erro ao excluir a conta do usuário:', errorText);
                 return false;
             }
+    
+            console.log('Conta do usuário excluída com sucesso!');
+            console.log('Todos os dados do usuário foram excluídos com sucesso!');
+    
+            return true;
         } catch (error) {
-            console.error('Erro de conexão:', error);
+            if (error instanceof Error) {
+                console.error('Erro durante a exclusão:', error.message);
+            } else {
+                console.error('Erro desconhecido durante a exclusão da conta:', error);
+            }
             return false;
         }
     }
@@ -274,6 +327,7 @@ class Usuario {
     
             if (response.status === 200) {
                 console.log('Usuário editado com sucesso!');
+                this.mensagem = 'Usuário editado com sucesso!'
                 return true;
             } else {
                 const errorData = await response.json();

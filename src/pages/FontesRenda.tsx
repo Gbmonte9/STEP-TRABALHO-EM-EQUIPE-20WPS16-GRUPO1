@@ -9,6 +9,7 @@ interface FonteRenda {
   nome: string;
   valor: number;
   data: string;
+  dataEdicao: string,
   categoria: string;
   usuarioId: number; 
 }
@@ -71,11 +72,11 @@ const FontesRenda: React.FC = () => {
                   valor: renda.getValor(),
                   categoria: renda.getCategoria(),
                   data: renda.getData() && !isNaN(renda.getData().getTime())
-                  ? renda.getData().toISOString()
-                  : new Date().toISOString(), 
-                  dataEdicao: renda.getDataEditar() && !isNaN(renda.getDataEditar().getTime())
-                  ? renda.getDataEditar().toISOString()
-                  : new Date().toISOString(),
+                    ? renda.getData().toISOString()
+                    : new Date().toISOString(), 
+                  dataEdicao: renda.getDataEditar() instanceof Date && !isNaN(renda.getDataEditar().getTime())
+                    ? renda.getDataEditar().toISOString()
+                    : new Date().toISOString(),
                   usuarioId: renda.getUsuarioId(),
                 })));
 
@@ -130,11 +131,11 @@ const FontesRenda: React.FC = () => {
                 valor: renda.getValor(),
                 categoria: renda.getCategoria(),
                 data: renda.getData() && !isNaN(renda.getData().getTime())
-                ? renda.getData().toISOString()
-                : new Date().toISOString(), 
-                dataEdicao: renda.getDataEditar() && !isNaN(renda.getDataEditar().getTime())
-                ? renda.getDataEditar().toISOString()
-                : new Date().toISOString(),
+                  ? renda.getData().toISOString()
+                  : new Date().toISOString(), 
+                dataEdicao: renda.getDataEditar() instanceof Date && !isNaN(renda.getDataEditar().getTime())
+                  ? renda.getDataEditar().toISOString()
+                  : new Date().toISOString(),
                 usuarioId: renda.getUsuarioId(),
               })));
 
@@ -172,7 +173,7 @@ const FontesRenda: React.FC = () => {
         setFontes(prevRendas =>
           prevRendas.map(renda =>
             renda.id === rendaId
-              ? { ...renda, nome: novoNome, categoria: novoCategoria, valor: novaValor }
+              ? { ...renda, nome: novoNome, categoria: novoCategoria, valor: novaValor, dataEdicao: dataEditar.toISOString() }
               : renda
           )
         );
@@ -270,20 +271,22 @@ const FontesRenda: React.FC = () => {
             {fontes.map((fonte) => (
               <li
                 key={fonte.id}
-                className="list-group-item d-flex flex-column flex-md-row justify-content-between align-items-center mb-2"
+                className="list-group-item d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-2"
               >
                 {rendaEditando === fonte.id ? (
-                  <div className="d-flex flex-column flex-md-row w-100">
+                 
+                  <div className="d-flex flex-column flex-md-row w-100 gap-2">
                     <input
                       type="text"
                       value={novoNome}
                       onChange={(e) => setNovoNome(e.target.value)}
-                      className="form-control me-2 mb-2 mb-md-0"
+                      className="form-control flex-grow-1"
+                      placeholder="Nome da Fonte"
                     />
                     <select
                       value={novoCategoria}
                       onChange={(e) => setNovoCategoria(e.target.value)}
-                      className="form-select me-2 mb-2 mb-md-0"
+                      className="form-select flex-grow-1"
                     >
                       {categorias.map((cat) => (
                         <option key={cat} value={cat}>
@@ -298,48 +301,59 @@ const FontesRenda: React.FC = () => {
                         const value = e.target.value;
                         setNovaValor(value === '' ? 0 : Number(value) || 0);
                       }}
-                      className="form-control me-2 mb-2 mb-md-0"
+                      className="form-control flex-grow-1"
+                      placeholder="Valor"
                     />
-                    <button className="btn btn-dark" onClick={() => handleSalvarEdicao(fonte.id)}>
+                    <button
+                      className="btn btn-dark"
+                      onClick={() => handleSalvarEdicao(fonte.id)}
+                    >
                       Salvar
                     </button>
                   </div>
                 ) : (
-                  <div className="d-flex flex-column flex-md-row w-100 justify-content-between align-items-center">
-                    <div className="d-flex flex-column flex-md-row align-items-center w-100 text-truncate">
+                  
+                  <div className="d-flex flex-column flex-md-row w-100 justify-content-between align-items-start align-items-md-center">
+                    <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center text-truncate">
+                     
                       <div className="d-flex align-items-center">
                         <strong>{fonte.nome}</strong>
                       </div>
-
-                      <div className="d-flex align-items-center ms-2 text-muted">
+                     
+                      <div className="d-flex align-items-center ms-md-2 text-muted">
                         <i className="fas fa-coins"></i>
-                        <span className="ms-1">
-                          {fonte.categoria}
-                        </span>
+                        <span className="ms-1">{fonte.categoria}</span>
                       </div>
-
-                      <div className="d-flex align-items-center ms-2 text-primary">
+                   
+                      <div className="d-flex align-items-center ms-md-2 text-primary">
                         <i className="fas fa-dollar-sign"></i>
                         <span className="ms-1">R${fonte.valor.toFixed(2)}</span>
                       </div>
-
-                      <div className="d-flex align-items-center ms-2 text-secondary">
+                 
+                      <div className="d-flex align-items-center ms-md-2 text-secondary">
                         <i className="fas fa-calendar-alt"></i>
                         <span className="ms-1">
                           {format(new Date(fonte.data), 'dd MMMM yyyy, HH:mm:ss')}
                         </span>
                       </div>
+             
+                      <div className="d-flex align-items-center ms-md-2 text-secondary">
+                        <i className="fas fa-calendar-alt"></i>
+                        <span>
+                          {format(new Date(fonte.dataEdicao), 'dd MMMM yyyy, HH:mm:ss')}
+                        </span>
+                      </div>
                     </div>
-
-                    <div className="d-flex flex-wrap justify-content-end mt-2 mt-md-0 w-100">
+                
+                    <div className="d-flex flex-wrap justify-content-end mt-2 mt-md-0 gap-2">
                       <button
-                        className="btn btn-dark btn-sm me-2 mb-2 mb-md-0"
+                        className="btn btn-dark btn-sm"
                         onClick={() => handleEditarClique(fonte)}
                       >
                         Editar
                       </button>
                       <button
-                        className="btn btn-secondary btn-sm mb-2 mb-md-0"
+                        className="btn btn-secondary btn-sm"
                         onClick={() => removerFonte(fonte.id)}
                       >
                         Remover

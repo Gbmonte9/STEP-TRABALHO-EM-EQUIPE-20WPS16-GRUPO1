@@ -5,12 +5,14 @@ import '../styles/Sidebar.css';
 const Sidebar = () => {
   return (
     <div className="sidebar bg-light vh-100" style={{ width: '180px', position: 'fixed', left: 0, top: 0 }}>
-      <div className='p-1'>
-        <h2 className="mb-4 text-start">ADC</h2>
+      <div className="container">
+        <div className='p-1 text-center'>
+            <h2 className="mb-4">ADC</h2>
+        </div>
       </div>
       <ul className="nav flex-column">
         <li className="nav-item p-0">
-          <Link className="nav-link text-start" to="/">
+          <Link className="nav-link text-start" to="/dashboard">
             <i className="bi bi-speedometer2"></i> Dashboard
           </Link>
         </li>
@@ -40,7 +42,7 @@ const Sidebar = () => {
           </Link>
         </li>
         <li className="nav-item p-0">
-          <Link className="nav-link text-start" to="/login">
+          <Link className="nav-link text-start" to="/">
             <i className="bi bi-box-arrow-right"></i> Sair
           </Link>
         </li>

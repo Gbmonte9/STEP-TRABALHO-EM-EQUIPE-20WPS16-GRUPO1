@@ -1,10 +1,26 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Legend, Tooltip, LabelList } from 'recharts';
 import { PieChart, Pie, Cell, Tooltip as PieTooltip } from 'recharts';
 import Carteira from "../classes/Carteira.ts";
 import Despesa from "../classes/Despesa.ts";
 import Renda from "../classes/FonteDeRenda.ts";
 const COLORS = ['#0088FE', '#FF8042', '#FFBB28'];
+
+const taxasDeCambio: {
+  USD: number;
+  EUR: number;
+  GBP: number;
+  JPY: number;
+  BTC: number;
+  BRL: number;
+} = {
+  USD: 5.3,
+  EUR: 5.5,
+  GBP: 6.5,
+  JPY: 0.035,
+  BTC: 150000,
+  BRL: 1,
+};
 
 type CarteiraSimplificada = {
   id: number;
@@ -107,19 +123,29 @@ const Relatorio = () => {
           nome: renda.getNome(),
           valor: renda.getValor(),
           categoria: renda.getCategoria(),
-          data: formatDate(renda.getData()),
-          dataEdicao: formatDate(renda.getDataEditar()),
+          data: renda.getData() && !isNaN(renda.getData().getTime())
+            ? renda.getData().toISOString()
+            : new Date().toISOString(), 
+          dataEdicao: renda.getDataEditar() instanceof Date && !isNaN(renda.getDataEditar().getTime())
+            ? renda.getDataEditar().toISOString()
+            : new Date().toISOString(),
           usuarioId: renda.getUsuarioId(),
         })));
 
     
         const totalReceitas = rendasAtualizadas.reduce((acc, renda) => acc + (Number(renda.getValor()) || 0), 0);
         const totalDespesas = despesasAtualizadas.reduce((acc, despesa) => acc + (Number(despesa.getValor()) || 0), 0);
-        const saldoTotalCarteira = carteirasAtualizadas.reduce((acc, carteira) => acc + (Number(carteira.getSaldo()) || 0), 0);
+
+        const saldoTotalRealmente = carteirasAtualizadas.reduce((total, carteira) => {
+          const moedaCarteira = carteira.getMoeda() as keyof typeof taxasDeCambio;
+          const taxaDeCambio = taxasDeCambio[moedaCarteira] || 1;
+        
+          return total + Number(carteira.getSaldo()) * taxaDeCambio;
+        }, 0);
 
         setTotalReceitas(totalReceitas);
         setTotalDespesa(totalDespesas);
-        setSaldoTotalCarteira(saldoTotalCarteira);
+        setSaldoTotalCarteira(saldoTotalRealmente);
 
       } catch (error) {
         console.error("Erro ao carregar dados", error);
@@ -155,9 +181,15 @@ const Relatorio = () => {
   
     const receita = rendas?.reduce((acc, renda) => acc + (Number(renda.valor) || 0), 0) || 0;
     const despesa = despesas?.reduce((acc, despesa) => acc + (Number(despesa.valor) || 0), 0) || 0;
-    const saldoTotalCarteira = carteiras?.reduce((acc, carteira) => acc + (Number(carteira.saldo) || 0), 0) || 0;
+    const saldoTotalRealmente = carteiras.reduce((total, carteira) => {
+      const moedaCarteira = carteira.moeda as keyof typeof taxasDeCambio;
+      const taxaDeCambio = taxasDeCambio[moedaCarteira] || 1;
+    
+      return total + Number(carteira.saldo) * taxaDeCambio;
+    }, 0);
 
-    const saldoFinalCarteira = receita - despesa + saldoTotalCarteira;
+
+    const saldoFinalCarteira = receita - despesa + saldoTotalRealmente;
   
 
     const dataAtual = new Date();
@@ -239,11 +271,11 @@ const Relatorio = () => {
         <h2 className="text-center mb-4">Relatório Financeiro</h2>
 
         <div className="row mb-4">
-          <div className="col-lg-12">
+          <div className="col-12">
             <div className="card shadow-sm">
               <div className="card-body">
                 <h4 className="card-title text-center">Receitas, Despesas e Carteira em Tempo Real</h4>
-                <ResponsiveContainer width="100%" height={400}>
+                <ResponsiveContainer width="100%" height={window.innerWidth < 768 ? 300 : 400}>
                   <LineChart data={dataLinha}>
                     <CartesianGrid strokeDasharray="5 5" stroke="#ddd" />
                     <XAxis dataKey="name" tick={{ fontSize: 12 }} tickLine={false} />
@@ -323,7 +355,7 @@ const Relatorio = () => {
               <div className="card-body">
                 <h5 className="card-title">Saldo Total</h5>
                 <p className="card-text">
-                  $ {((totalReceitas || 0) + (totalDespesa || 0)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  R$ {((totalReceitas || 0) + (totalDespesa || 0)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </p>
               </div>
             </div>
@@ -334,7 +366,7 @@ const Relatorio = () => {
               <div className="card-body">
                   <h5 className="card-title">Carteira</h5>
                   <p className="card-text">
-                    ${saldoTotalCarteira?.toString()}
+                    R${saldoTotalCarteira?.toString()}
                   </p>
                 </div>
               </div>

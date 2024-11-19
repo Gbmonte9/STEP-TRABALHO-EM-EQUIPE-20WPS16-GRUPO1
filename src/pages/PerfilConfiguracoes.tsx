@@ -79,7 +79,7 @@ const PerfilConfiguracoes = () => {
 
       if (sucesso) {
         console.log("Conta excluída com sucesso!");
-        navigate("/login"); 
+        navigate("/"); 
       } else {
         console.log("Falha ao excluir a conta.");
       }

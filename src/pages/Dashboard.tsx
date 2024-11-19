@@ -6,6 +6,22 @@ import Renda from '../classes/FonteDeRenda.ts';
 
 import '../styles/Carteira.css';
 
+const taxasDeCambio: {
+  USD: number;
+  EUR: number;
+  GBP: number;
+  JPY: number;
+  BTC: number;
+  BRL: number;
+} = {
+  USD: 5.3,
+  EUR: 5.5,
+  GBP: 6.5,
+  JPY: 0.035,
+  BTC: 150000,
+  BRL: 1,
+};
+
 type CarteiraSimplificada = {
   id: number;
   nome: string;
@@ -79,13 +95,17 @@ const Dashboard: React.FC = () => {
 
       const rendaInstance = new Renda();
       const rendasAtualizadas = await rendaInstance.listarRenda(usuarioId);
-      setRendas(rendasAtualizadas.map(renda => ({
+      setRendas(rendasAtualizadas.map((renda) => ({
         id: renda.getId(),
         nome: renda.getNome(),
         valor: renda.getValor(),
         categoria: renda.getCategoria(),
-        data: formatDate(renda.getData()),
-        dataEdicao: formatDate(renda.getDataEditar()),
+        data: renda.getData() && !isNaN(renda.getData().getTime())
+          ? renda.getData().toISOString()
+          : new Date().toISOString(), 
+        dataEdicao: renda.getDataEditar() instanceof Date && !isNaN(renda.getDataEditar().getTime())
+          ? renda.getDataEditar().toISOString()
+          : new Date().toISOString(),
         usuarioId: renda.getUsuarioId(),
       })));
     } catch (error) {
@@ -103,7 +123,16 @@ const Dashboard: React.FC = () => {
     return date && !isNaN(date.getTime()) ? date.toISOString() : new Date().toISOString();
   };
 
-  const saldoTotalCarteiras = useMemo(() => carteiras.reduce((total, carteira) => total + carteira.saldo, 0), [carteiras]);
+  const saldoTotalRealmente = useMemo(() => {
+    return carteiras.reduce((total, carteira) => {
+      
+      const moedaCarteira = carteira.moeda as keyof typeof taxasDeCambio;
+  
+      const taxaDeCambio = taxasDeCambio[moedaCarteira] || 1; 
+  
+      return total + (carteira.saldo * taxaDeCambio);
+    }, 0);
+  }, [carteiras, taxasDeCambio]);
 
   const totalDespesas = useMemo(() => {
     const total = despesas.reduce((acc, despesa) => {
@@ -131,7 +160,7 @@ const Dashboard: React.FC = () => {
           <div className="card text-white bg-dark mb-3">
             <div className="card-header">Saldo Total das Carteiras</div>
             <div className="card-body">
-              <h4 className="card-title">R$ {saldoTotalCarteiras.toFixed(2)}</h4>
+              <h4 className="card-title">R$ {saldoTotalRealmente.toFixed(2)}</h4>
             </div>
           </div>
         </div>

@@ -15,16 +15,7 @@ interface ICarteira {
   usuarioId: number;
 }
 
-const simbolosMoedas = {
-  BRL: 'R$',
-  USD: '$',
-  EUR: '€',
-  GBP: '£',
-  JPY: '¥'
-};
-
-// Lista de moedas
-const moedas = ['BRL', 'USD', 'EUR', 'GBP', 'JPY'];
+const moedas = ['BRL', 'USD', 'EUR', 'GBP', 'JPY', 'BTC'];
 
 const Carteira = () => {
   const [carteiras, setCarteiras] = useState<ICarteira[]>([]);
@@ -173,7 +164,13 @@ const Carteira = () => {
         setCarteiras(prevCarteiras =>
           prevCarteiras.map(carteira =>
             carteira.id === carteiraId
-              ? { ...carteira, nome: novoNome, moeda: novaMoeda, saldo: novoSaldo }
+              ? { 
+                  ...carteira, 
+                  nome: novoNome, 
+                  moeda: novaMoeda, 
+                  saldo: novoSaldo, 
+                  dataEdicao: dataEditar.toISOString() 
+                }
               : carteira
           )
         );
@@ -274,20 +271,22 @@ const Carteira = () => {
             {carteiras.map((carteira) => (
               <li
                 key={carteira.id}
-                className="list-group-item d-flex flex-column flex-md-row justify-content-between align-items-center mb-2"
+                className="list-group-item d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-2"
               >
                 {carteiraEditando === carteira.id ? (
-                  <div className="d-flex flex-column flex-md-row w-100">
+
+                  <div className="d-flex flex-column flex-md-row w-100 gap-2">
                     <input
                       type="text"
                       value={novoNome}
                       onChange={(e) => setNovoNome(e.target.value)}
-                      className="form-control me-2 mb-2 mb-md-0"
+                      className="form-control flex-grow-1"
+                      placeholder="Nome da Carteira"
                     />
                     <select
                       value={novaMoeda}
                       onChange={(e) => setNovaMoeda(e.target.value)}
-                      className="form-select me-2 mb-2 mb-md-0"
+                      className="form-select flex-grow-1"
                     >
                       {moedas.map((moeda) => (
                         <option key={moeda} value={moeda}>
@@ -302,48 +301,59 @@ const Carteira = () => {
                         const value = e.target.value;
                         setNovoSaldo(value === '' ? 0 : Number(value) || 0);
                       }}
-                      className="form-control me-2 mb-2 mb-md-0"
+                      className="form-control flex-grow-1"
+                      placeholder="Saldo"
                     />
-                    <button className="btn btn-dark" onClick={() => handleSalvarEdicao(carteira.id)}>
+                    <button
+                      className="btn btn-dark"
+                      onClick={() => handleSalvarEdicao(carteira.id)}
+                    >
                       Salvar
                     </button>
                   </div>
                 ) : (
-                  <div className="d-flex flex-column flex-md-row w-100 justify-content-between align-items-center">
-                    <div className="d-flex flex-column flex-md-row align-items-center w-100 text-truncate">
+
+                  <div className="d-flex flex-column flex-md-row w-100 justify-content-between align-items-start align-items-md-center">
+                    <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center text-truncate">
+
                       <div className="d-flex align-items-center">
                         <strong>{carteira.nome}</strong>
                       </div>
 
-                      <div className="d-flex align-items-center ms-2 text-muted">
+                      <div className="d-flex align-items-center ms-md-2 text-muted">
                         <i className="fas fa-coins"></i>
-                        <span className="ms-1">
-                          {carteira.moeda}
-                        </span>
+                        <span className="ms-1">{carteira.moeda}</span>
                       </div>
-
-                      <div className="d-flex align-items-center ms-2 text-primary">
-                        <i className="fas fa-dollar-sign"></i>
-                        <span className="ms-1">R${carteira.saldo.toFixed(2)}</span>
+         
+                      <div className="d-flex align-items-center ms-md-2 text-primary">
+                        <i className="fas fa-money-bill"></i>
+                        <span className="ms-1">{carteira.saldo.toFixed(2)}</span>
                       </div>
-
-                      <div className="d-flex align-items-center ms-2 text-secondary">
+             
+                      <div className="d-flex align-items-center ms-md-2 text-secondary">
                         <i className="fas fa-calendar-alt"></i>
                         <span className="ms-1">
                           {format(new Date(carteira.data), 'dd MMMM yyyy, HH:mm:ss')}
                         </span>
                       </div>
-                    </div>
 
-                    <div className="d-flex flex-wrap justify-content-end mt-2 mt-md-0 w-100">
+                      <div className="d-flex align-items-center ms-md-2 text-secondary">
+                        <i className="fas fa-calendar-alt"></i>
+                        <span>
+                          {format(new Date(carteira.dataEdicao), 'dd MMMM yyyy, HH:mm:ss')}
+                        </span>
+                      </div>
+                    </div>
+       
+                    <div className="d-flex flex-wrap justify-content-end mt-2 mt-md-0 gap-2">
                       <button
-                        className="btn btn-dark btn-sm me-2 mb-2 mb-md-0"
+                        className="btn btn-dark btn-sm"
                         onClick={() => handleEditarClique(carteira)}
                       >
                         Editar
                       </button>
                       <button
-                        className="btn btn-secondary btn-sm mb-2 mb-md-0"
+                        className="btn btn-secondary btn-sm"
                         onClick={() => removerCarteira(carteira.id)}
                       >
                         Remover
